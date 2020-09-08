@@ -5,6 +5,8 @@
 import classes
 import pygame
 import in_game as ingame
+import math
+import time
 
 SIZE_BOARD = 40
 
@@ -90,13 +92,95 @@ def check_buttons(controls, pos):
 # Input: config -> class that contains the info from the config file, screen -> screen surface, bubbles -> matrix that contains the bubbles info
 # Output: ---
 def draw_bubbles(screen, config, bubbles):
-    for i in range (config.initial_lines):
+    for i in range (len(bubbles[:,0])):
         for j in range (int (config.width / (2*config.r))):  
             if bubbles[i][j]!= 0:   
-                #Fetches the respective RGB color code
-                color= ingame.pick_color(bubbles[i][j])
-                #circle(surface, color, center, radius)
-                    #Draws circle
-                pygame.draw.circle(screen, color, (j*2*config.r + config.r,i*2*config.r + config.r + SIZE_BOARD), config.r)
-                    #Draws outline
-                pygame.draw.circle(screen, (0,0,0), (j*2*config.r + config.r,i*2*config.r + config.r + SIZE_BOARD), config.r, 1)
+                draw_one_bubble(screen,config,bubbles[i][j],((j*2*config.r + config.r,i*2*config.r + config.r + SIZE_BOARD)))
+
+
+
+#----------------------------------------------
+# Function:
+# Input: 
+# Output: ---
+def draw_play_bubble(screen,config,bubble_in_play):
+    #Bubble in play
+    draw_one_bubble(screen,config,bubble_in_play[1],(int(config.width/2), config.height+SIZE_BOARD-config.r))
+    
+
+
+
+#----------------------------------------------
+# Function:
+# Input: 
+# Output: ---
+def draw_next_bubble(screen,config,bubble_in_play):
+    #Next bubble
+    draw_one_bubble(screen,config,bubble_in_play[0],(config.r, config.height+SIZE_BOARD-config.r))
+        #Draw box
+    pygame.draw.rect(screen, (0,0,0), (0,config.height+SIZE_BOARD-2*config.r, 2*config.r, 2*config.r ), 2)
+
+
+
+#----------------------------------------------
+# Function:
+# Input: 
+# Output: ---
+def draw_line(config, screen, end_pos, alpha):
+    y_base= config.height + SIZE_BOARD - config.r
+    x_base=int(config.width/2)
+
+    #draw line
+    pygame.draw.line(screen, (0,0,0), (x_base, y_base), end_pos, 2)
+
+    #Calculate Triangle Point
+    size_arrow=int(config.r/2)
+    beta=math.pi/4 - alpha
+
+    x1=end_pos[0]-size_arrow*math.sin(beta)
+    y1=end_pos[1]+size_arrow*math.cos(beta)
+    
+    x2=end_pos[0]-size_arrow*math.cos(beta)
+    y2=end_pos[1]-size_arrow*math.sin(beta)
+    
+    #Draw Triangle
+    pygame.draw.polygon(screen, (0,0,0), [end_pos, (x1,y1), (x2,y2)])
+    
+
+
+
+#----------------------------------------------
+# Function:
+# Input: 
+# Output: ---
+def draw_one_bubble(screen, config, bubble,p):
+    color= ingame.pick_color(bubble)
+    #Draw Circle
+    pygame.draw.circle(screen, color, (p[0],p[1]), config.r)
+    #Draws outline
+    pygame.draw.circle(screen, (0,0,0),(p[0],p[1]), config.r, 1)
+
+
+
+#----------------------------------------------
+# Function:
+# Input: 
+# Output: ---
+def launch_bubble(config, alpha, bubble_in_play, screen,p, bubbles, flag_attach):
+    x=p[0]
+    y=p[1]
+    launched=True
+    if (x>0+config.r and x<config.width-config.r and y>SIZE_BOARD+config.r and y<config.height+SIZE_BOARD) and flag_attach:
+        x+= int(config.r*math.cos(alpha))
+        y-= int(config.r*math.sin(alpha))
+        time.sleep(0.025)
+        
+        draw_one_bubble(screen, config,bubble_in_play[1], [x,y])
+        pygame.display.update()
+        bubbles, flag_attach=ingame.detect_collision(config, [x,y], bubbles, bubble_in_play)
+
+        return [x,y], launched, bubble_in_play, bubbles, flag_attach
+    launched=False
+    ingame.bubble_in_play(bubble_in_play)
+    return [0,0], launched, bubble_in_play, bubbles, flag_attach
+
