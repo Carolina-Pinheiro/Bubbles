@@ -64,7 +64,7 @@ def control_board(screen, config):
     screen.blit(surfaces[0],(0.04*config.width, 0.225*SIZE_BOARD) )
     screen.blit(surfaces[1],(0.265*config.width, 0.225*SIZE_BOARD) )
     screen.blit(surfaces[2],(0.715*config.width, 0.225*SIZE_BOARD) )
-
+    
     return controls
 
 
@@ -170,17 +170,18 @@ def launch_bubble(config, alpha, bubble_in_play, screen,p, bubbles, flag_attach)
     x=p[0]
     y=p[1]
     launched=True
-    if (x>0+config.r and x<config.width-config.r and y>SIZE_BOARD+config.r and y<config.height+SIZE_BOARD) and flag_attach:
+    if (x>0 and x<config.width and y>SIZE_BOARD+config.r and y<config.height+SIZE_BOARD) and flag_attach:
         x+= int(config.r*math.cos(alpha))
         y-= int(config.r*math.sin(alpha))
         time.sleep(0.025)
         
         draw_one_bubble(screen, config,bubble_in_play[1], [x,y])
         pygame.display.update()
-        bubbles, flag_attach=ingame.detect_collision(config, [x,y], bubbles, bubble_in_play)
+        bubbles, flag_attach, game=ingame.detect_collision(config, [x,y], bubbles, bubble_in_play)
 
-        return [x,y], launched, bubble_in_play, bubbles, flag_attach
+        return [x,y], launched, bubble_in_play, bubbles, flag_attach, game
     launched=False
     ingame.bubble_in_play(bubble_in_play)
-    return [0,0], launched, bubble_in_play, bubbles, flag_attach
+    game=True
+    return [0,0], launched, bubble_in_play, bubbles, flag_attach, game
 
