@@ -161,7 +161,7 @@ def detect_collision(config, p, bubbles, bubble_in_play):
     x=p[0]
     y=p[1]
     n_bubbles = int (config.width / (2*config.r))
-    max_lines= int(config.height/(2*config.r) ) -config.initial_lines -2 + config.initial_lines
+    max_lines= int(config.height/(2*config.r) ) -config.initial_lines -2 + config.ini
 
     for i in range (len(bubbles[:,0])):
         for j in range (int (config.width / (2*config.r))):  
