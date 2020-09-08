@@ -158,53 +158,39 @@ def line(config):
 # Input:
 # Output: 
 def detect_collision(config, p, bubbles, bubble_in_play):
-    x=p[0]
-    y=p[1]
-    n_bubbles = int (config.width / (2*config.r))
-    max_lines= int(config.height/(2*config.r) ) -config.initial_lines -2 + config.ini
-
+    game= True
+    flag_attach=True
+    around=True
+    #Goes through the matrix
     for i in range (len(bubbles[:,0])):
         for j in range (int (config.width / (2*config.r))):  
+            #Center bubble coordinates
             b_x=j*2*config.r + config.r
             b_y=i*2*config.r + config.r + ggraph.SIZE_BOARD
 
-            dist=calculate_distance([b_x,b_y], [x,y])
+            #Calculate distance between one given bubble and the bubble that was launched
+            dist=calculate_distance([b_x,b_y], p)
+
+            #If it's close enough, let's check where it will land
             if dist<config.dl*2*config.r and bubbles[i][j]!=0:
+                #Check Around the bubble
+                flag_attach, bubbles=check_around(bubbles,i,j,p,[b_x,b_y], bubble_in_play)
                 
-                print('centro'+ str([bubbles[i][j]]))
-                if j+1<n_bubbles:
-                    print('direita' +str(bubbles[i][j+1]))
-                    #Direita
-                    if  y>=(-x+b_x+b_y) and y<=(x-b_x+b_y) and bubbles[i][j+1]==0:
-                        bubbles[i][j+1]= bubble_in_play[1]
-                        flag_attach=False
-                        print(bubbles)
-                if i+1< max_lines:
-                    print('baixo' +str(bubbles[i+1][j]))
-                    #Baixo
-                    if y>=(-x+b_x+b_y) and y>=(x-b_x+b_y)and bubbles[i+1][j]==0:
-                        bubbles[i+1][j] = bubble_in_play[1]
-                        flag_attach=False
-                        print(bubbles)
-                if j-1>=0:
-                    print('esquerda' +str(bubbles[i][j-1]))
-                    #Esquerda
-                    if y<=(-x+b_x+b_y) and y>=(x-b_x+b_y)and bubbles[i][j-1]==0:
-                        bubbles[i][j-1] = bubble_in_play[1]
-                        flag_attach=False
-                    print(bubbles)
-                if i-1>=0:
-                    print('cima' +str(bubbles[i-1][j]))
-                    #Cima
-                    if y<=(-x+b_x+b_y) and y<=(x-b_x+b_y)and bubbles[i-1][j]==0:
-                        bubble_in_play[i-1][j] = bubble_in_play[1]
-                
-                #time.sleep(30)
-                print(bubbles[0])
-                return bubbles, flag_attach
+                #The bubble can't attach around, game ends
+                if flag_attach == True:
+                    around=False
+                    break
+                return bubbles, flag_attach, game
     
-    flag_attach=True
-    return bubbles, flag_attach
+    #Checks if it can attach to the top of the board
+    if p[1]>ggraph.SIZE_BOARD and p[1] <ggraph.SIZE_BOARD+config.r and flag_attach==True:
+        x=int (round((p[0]/(2*config.r)),0))
+        if bubbles[0][x]==0:
+            bubbles[0][x]= bubble_in_play[1]
+    elif around==False:
+        game=False
+    #It isn't close enough to any bubble
+    return bubbles, flag_attach, game
 
 
 
@@ -215,3 +201,33 @@ def detect_collision(config, p, bubbles, bubble_in_play):
 def calculate_distance(p1,p2):
     dist=math.sqrt((p1[0]-p2[0])**2 + (p1[1]-p2[1])**2  )
     return dist
+
+
+
+#----------------------------------------------
+# Function: 
+# Input:
+# Output: 
+def check_around(bubbles,i,j,z,b, bubble_in_play):
+    flag_attach=True
+    #To the right
+    if j+1<len(bubbles[0]) and flag_attach and  z[1]>=(-z[0]+b[0]+b[1]) and z[1]<=(z[0]-b[0]+b[1]) and bubbles[i][j+1]==0:
+            bubbles[i][j+1]= bubble_in_play[1]
+            flag_attach=False
+
+    #Below
+    if i+1<len(bubbles[:,0]) and flag_attach and z[1]>=(-z[0]+b[0]+b[1]) and z[1]>=(z[0]-b[0]+b[1])and bubbles[i+1][j]==0:
+            bubbles[i+1][j] = bubble_in_play[1]
+            flag_attach=False
+
+    #To the left
+    if j-1>=0 and flag_attach and z[1]<=(-z[0]+b[0]+b[1]) and z[1]>=(z[0]-b[0]+b[1])and bubbles[i][j-1]==0:
+            bubbles[i][j-1] = bubble_in_play[1]
+            flag_attach=False
+
+    #Above
+    if i-1>=0 and flag_attach and  z[1]<=(-z[0]+b[0]+b[1]) and z[1]<=(z[0]-b[0]+b[1])and bubbles[i-1][j]==0:
+            bubble_in_play[i-1][j] = bubble_in_play[1]
+            flag_attach=False
+    
+    return flag_attach, bubbles
