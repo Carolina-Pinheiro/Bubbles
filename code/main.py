@@ -42,7 +42,7 @@ while game:
         #Events
         game, new_game, launched=ingame.events(controls, alpha, config, bubble_in_play, screen)
     else:
-        [bubble_x,bubble_y], launched, bubble_in_play, bubbles, flag_attach = ggraph.launch_bubble(config, alpha, bubble_in_play, screen,[bubble_x,bubble_y], bubbles, flag_attach)
+        [bubble_x,bubble_y], launched, bubble_in_play, bubbles, flag_attach, game = ggraph.launch_bubble(config, alpha, bubble_in_play, screen,[bubble_x,bubble_y], bubbles, flag_attach)
     
     if new_game == True:
         bubbles=ingame.init_board(config)
