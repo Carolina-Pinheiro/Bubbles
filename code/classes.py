@@ -8,3 +8,10 @@ class config:
         self.initial_lines= initial_lines
         self.N_moves= N_moves
         self.screen= screen
+
+#Bubble Class
+class bubble:
+    def __init__(self,x,y,color):
+        self.x=x
+        self.y=y
+        self.color= color 
