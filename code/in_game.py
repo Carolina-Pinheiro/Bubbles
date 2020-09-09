@@ -30,16 +30,22 @@ def init_board(config):
     #Generate game board
     n_bubbles = int (config.width / (2*config.r))
     print(config.initial_lines, n_bubbles )
-    bubbles= np.random.randint(1,10,(config.initial_lines, n_bubbles ))
 
     #Calculate the max number of lines
-    max_lines= int(config.height/(2*config.r) ) -config.initial_lines -2
-    newrow= np.zeros(n_bubbles) 
+    max_lines= int(config.height/(2*config.r) ) -config.initial_lines -1
+    print(max_lines)
+    #Create Matrix
+    bubbles= np.empty((max_lines+config.initial_lines, n_bubbles ), dtype=classes.bubble)
     
-    for i in range(max_lines):
-        bubbles = np.vstack([bubbles, newrow])
-    
-    print(bubbles)
+    #Fill matrix 
+    for i in range(max_lines+ config.initial_lines):
+        for j in range(n_bubbles):
+            if i < config.initial_lines:
+                #classes.bubble(x,y,color)
+                bubbles[i][j]=classes.bubble(j*2*config.r + config.r,i*2*config.r + config.r + ggraph.SIZE_BOARD, random.randrange(1,10))
+            else:
+                #empty
+                bubbles[i][j]=classes.bubble(j*2*config.r + config.r,i*2*config.r + config.r + ggraph.SIZE_BOARD, 0)
     return bubbles
 
 
@@ -118,8 +124,8 @@ def pick_color(bubble):
 # Input:
 # Output: 
 def bubble_in_play(bubble_in_play):
-    bubble_in_play[1]= bubble_in_play[0]
-    bubble_in_play[0]=random.randrange(1,10)
+    bubble_in_play[1].color= bubble_in_play[0].color
+    bubble_in_play[0].color=random.randrange(1,10)
 
 
 
@@ -180,11 +186,11 @@ def calculate_distance(p1,p2):
 # Function: 
 # Input:
 # Output: 
-def is_first_line(x,y, config, bubbles, bubble_in_play):
-    if ggraph.SIZE_BOARD<=y<=ggraph.SIZE_BOARD+2*config.r: #is in the first line
-        position= int(x / (2*config.r))
-        if bubbles [0][position]==0:
-            bubbles[0][position]= bubble_in_play[1]
+def is_first_line(config, bubbles, bubble_in_play):
+    if ggraph.SIZE_BOARD<=bubble_in_play.y<=ggraph.SIZE_BOARD+2*config.r: #is in the first line
+        position= int(bubble_in_play.x / (2*config.r))
+        if bubbles [0][position].color==0:
+            bubbles[0][position].color= bubble_in_play.color
         return True
     return False
 
@@ -194,7 +200,7 @@ def is_first_line(x,y, config, bubbles, bubble_in_play):
 # Function: 
 # Input:
 # Output:
-def collision(bubbles,position_launched, bubble_in_play, config):
+def collision(bubbles, bubble_in_play, config):
     collide_dist=[]
     collide_pos=[]
     pre_collide_pos=[]
@@ -204,28 +210,26 @@ def collision(bubbles,position_launched, bubble_in_play, config):
     #Go through board
     for i in range (len(bubbles[:,0])):
         for j in range (len(bubbles[0])):
-            if bubbles[i][j]!=0:
-                #Position of the bubble we are comparing
-                position_bubble=[2*config.r*j + config.r, 2*config.r*i + config.r + ggraph.SIZE_BOARD]
+            if bubbles[i][j].color!=0:
                 #Calculate distance between two bubbles
-                dist=calculate_distance(position_launched,position_bubble)
+                dist=calculate_distance([bubble_in_play.x, bubble_in_play.y],[bubbles[i][j].x, bubbles[i][j].y])
                 #There is a collision
                 if dist < (2*config.r*config.dl):
                     #Save information
                     collide_dist.append(dist)
                     collide_pos.append([i,j])
-                    pre_collide_pos.append(position_launched)
+                    pre_collide_pos.append([bubble_in_play.x, bubble_in_play.y])
                     boom= True
-                    print('BOOM!!!',i,j,dist, position_bubble)
+                    print('BOOM!!!',i,j,dist)
     
     #See which position is the closest
     if boom == True:
         print(collide_dist, collide_pos)
         index=collide_dist.index(min(collide_dist))
         #Where to attach the next bubble
-        bubbles, launched, game=collision_where(collide_pos[index], bubble_in_play, bubbles, config, pre_collide_pos[index] )
+        bubbles, launched=collision_where(collide_pos[index], bubble_in_play, bubbles, config, pre_collide_pos[index] )
     
-    return bubbles, launched, game
+    return bubbles, launched
 
 
 
@@ -236,40 +240,48 @@ def collision(bubbles,position_launched, bubble_in_play, config):
 def collision_where(collide_pos, bubble_in_play, bubbles, config, position):
     i=collide_pos[0]
     j=collide_pos[1]
-    b=[2*config.r*j + config.r, 2*config.r*i + config.r + ggraph.SIZE_BOARD]
+    b=[bubbles[i][j].x, bubbles[i][j].y]
     launched=True
     game= True
     #Attach
     
     #To the right
-    if j+1<len(bubbles[0]) and  position[1]>=(-position[0]+b[0]+b[1]) and position[1]<=(position[0]-b[0]+b[1]) and bubbles[i][j+1]==0:
-        bubbles[i][j+1]= bubble_in_play
+    if j+1<len(bubbles[0]) and  position[1]>=(-position[0]+b[0]+b[1]) and position[1]<=(position[0]-b[0]+b[1]) and bubbles[i][j+1].color==0:
+        bubbles[i][j+1].color= bubble_in_play.color
         launched= False
         print('Right')
     
     #Below
-    elif i+1<len(bubbles[:,0]) and position[1]>=(-position[0]+b[0]+b[1]) and position[1]>=(position[0]-b[0]+b[1])and bubbles[i+1][j]==0:
-        bubbles[i+1][j] = bubble_in_play
+    elif position[1]>=(-position[0]+b[0]+b[1]) and position[1]>=(position[0]-b[0]+b[1])and bubbles[i+1][j].color==0:
+        bubbles[i+1][j].color = bubble_in_play.color
         launched= False
         print('Below')
     
     #To the left
-    elif j-1>=0  and position[1]<=(-position[0]+b[0]+b[1]) and position[1]>=(position[0]-b[0]+b[1])and bubbles[i][j-1]==0:
-        bubbles[i][j-1] = bubble_in_play
+    elif j-1>=0  and position[1]<=(-position[0]+b[0]+b[1]) and position[1]>=(position[0]-b[0]+b[1])and bubbles[i][j-1].color==0:
+        bubbles[i][j-1].color = bubble_in_play.color
         launched= False
         print('Left')
     
     #Above
-    elif i-1>=0 and  position[1]<=(-position[0]+b[0]+b[1]) and position[1]<=(position[0]-b[0]+b[1])and bubbles[i-1][j]==0:
-        bubbles[i-1][j] = bubble_in_play
+    elif i-1>=0 and  position[1]<=(-position[0]+b[0]+b[1]) and position[1]<=(position[0]-b[0]+b[1])and bubbles[i-1][j].color==0:
+        bubbles[i-1][j].color = bubble_in_play.color
         launched= False
         print('Above')
-    else:
-        #The ball would attach in the last line
-        #if i+1==len(bubbles[:,0]) and (bubbles[i][j+1]!=0 or bubbles[i][j-1]!=0 or bubbles[i-1][j]!=0):
-        print('Game Over')
-        return bubbles, False, False
     
-        #print("I'm dumb, I can't attach")
-    
-    return bubbles, launched, game
+    return bubbles, launched
+
+
+
+#----------------------------------------------
+# Function: 
+# Input:
+# Output:
+def game_over(bubbles):
+    (rows,cols)=bubbles.shape
+    for i in range(cols):
+        if bubbles[rows-1][i].color!=0:
+            print('Game Over')
+            return False
+    return True
+
