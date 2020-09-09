@@ -22,8 +22,7 @@ def init_window(config):
     pygame.font.init()
 
     #Initialize window
-    screen = pygame.display.set_mode((config.width, config.height+SIZE_BOARD))
-    config.screen=screen
+    config.screen = pygame.display.set_mode((config.width, config.height+SIZE_BOARD))
     pygame.display.set_caption("Bubbles")
     icon = pygame.image.load("./images/icon.png")
     pygame.display.set_icon(icon)
@@ -95,8 +94,8 @@ def check_buttons(controls, pos):
 def draw_bubbles(config, bubbles):
     for i in range (len(bubbles[:,0])):
         for j in range (int (config.width / (2*config.r))):  
-            if bubbles[i][j]!= 0:   
-                draw_one_bubble(config,bubbles[i][j],((j*2*config.r + config.r,i*2*config.r + config.r + SIZE_BOARD)))
+            if bubbles[i][j].color!= 0:   
+                draw_one_bubble(config,bubbles[i][j])
 
 
 
@@ -108,7 +107,7 @@ def draw_bubbles(config, bubbles):
 # Output: ---
 def draw_next_bubble(config,bubble_in_play):
     #Next bubble
-    draw_one_bubble(config,bubble_in_play[0],(config.r, config.height+SIZE_BOARD-config.r))
+    draw_one_bubble(config,bubble_in_play)
         #Draw box
     pygame.draw.rect(config.screen, (0,0,0), (0,config.height+SIZE_BOARD-2*config.r, 2*config.r, 2*config.r ), 2)
 
@@ -145,12 +144,12 @@ def draw_line(config, end_pos, alpha):
 # Function:
 # Input: 
 # Output: ---
-def draw_one_bubble( config, bubble,p):
-    color= ingame.pick_color(bubble)
+def draw_one_bubble( config, bubble):
+    color= ingame.pick_color(bubble.color)
     #Draw Circle
-    pygame.draw.circle(config.screen, color, (p[0],p[1]), config.r)
+    pygame.draw.circle(config.screen, color, (bubble.x,bubble.y), config.r)
     #Draws outline
-    pygame.draw.circle(config.screen, (0,0,0),(p[0],p[1]), config.r, 1)
+    pygame.draw.circle(config.screen, (0,0,0),(bubble.x,bubble.y), config.r, 1)
 
 
 
@@ -158,33 +157,32 @@ def draw_one_bubble( config, bubble,p):
 # Function:
 # Input: 
 # Output: ---
-def launch_bubble(config, alpha, bubble_in_play,p, bubbles, attached):
-    x=p[0]
-    y=p[1]
+def launch_bubble(config, alpha, bubble_in_play, bubbles, attached):
     launched=True
-    game = True
+    
     #Bubble is within the board
-    if (x>0 and x<config.width and y>SIZE_BOARD+config.r and y<config.height+SIZE_BOARD):
-        x+= int(config.r*math.cos(alpha))
-        y-= int(config.r*math.sin(alpha))
-        time.sleep(0.025)
+    if (bubble_in_play[1].x>0 and bubble_in_play[1].x<config.width and bubble_in_play[1].y>SIZE_BOARD+config.r and bubble_in_play[1].y<config.height+SIZE_BOARD):
+        alpha=bounce_wall(bubble_in_play[1].x, config, alpha)
         
-        draw_one_bubble(config,bubble_in_play[1], [x,y])
-        pygame.display.update()
+        bubble_in_play[1].x+= int(config.r*math.cos(alpha))
+        bubble_in_play[1].y-= int(config.r*math.sin(alpha))
+        time.sleep(0.025)
+
+        draw_one_bubble(config,bubble_in_play[1])
         #collision
         if attached== False:
-            attached=ingame.is_first_line(x,y,config, bubbles, bubble_in_play)
+            attached=ingame.is_first_line(config, bubbles, bubble_in_play[1])
             #Is not in the first line, detect collision
             if attached == False: 
-                bubbles, launched, game=ingame.collision(bubbles,[x,y], bubble_in_play[1], config)
+                bubbles, launched=ingame.collision(bubbles, bubble_in_play[1], config)
         
         if launched == False:
             ingame.bubble_in_play(bubble_in_play)
         
-        return [x,y], launched, bubble_in_play, bubbles, attached, game
+        return launched, bubble_in_play, bubbles, attached,  alpha
     launched=False
     ingame.bubble_in_play(bubble_in_play)
-    return [0,0], launched, bubble_in_play, bubbles, attached, game
+    return  launched, bubble_in_play, bubbles, attached, alpha
 
 
 
@@ -207,4 +205,20 @@ def game_over_screen(config,score):
     config.screen.blit(surfaces[0],(0.10*config.width, 0.5*config.height) )
     config.screen.blit(surfaces[1],(0.10*config.width, 0.6*config.height) )
     config.screen.blit(surfaces[2],(0.10*config.width, 0.7*config.height) )
+
+
+
+#----------------------------------------------
+# Function: 
+# Input: 
+# Output: 
+def bounce_wall(position, config, alpha):
+    if position>0 and position<config.r:
+        print(alpha)
+        alpha= alpha- (math.pi/4)
+        print(alpha)
+    elif position<config.width and position > config.width - config.r:
+        alpha= alpha + math.pi /4
+    return alpha
+
 
