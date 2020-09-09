@@ -10,7 +10,18 @@ import random
 import math
 import time
 
-launched= False
+#launched= False
+
+#----------------------------------------------
+# Function: 
+# Input: config -> class that contains the info from the config file
+# Output:
+def game_loop(bubbles, bubble_in_play, launched, attached, game, config):
+    
+    return game, launched, attached
+
+
+
 #----------------------------------------------
 # Function: initializes a game board, randomly generating bubbles
 # Input: config -> class that contains the info from the config file
@@ -33,11 +44,12 @@ def init_board(config):
 
 
 
+
 #----------------------------------------------
 # Function: handles the pygame events
 # Input: controls -> list that contains the button's position in a rect object
 # Output: game-> True while game is running, new_game-> True when a new game is created
-def events(controls, alpha, config, bubble_in_play, screen):
+def events(controls, alpha, config, bubble_in_play):
     game=True
     new_game= False
     launched = False
@@ -153,46 +165,6 @@ def line(config):
 
 
 
-#----------------------------------------------
-# Function: 
-# Input:
-# Output: 
-def detect_collision(config, p, bubbles, bubble_in_play):
-    game= True
-    flag_attach=True
-    around=True
-    #Goes through the matrix
-    for i in range (len(bubbles[:,0])):
-        for j in range (int (config.width / (2*config.r))):  
-            #Center bubble coordinates
-            b_x=j*2*config.r + config.r
-            b_y=i*2*config.r + config.r + ggraph.SIZE_BOARD
-
-            #Calculate distance between one given bubble and the bubble that was launched
-            dist=calculate_distance([b_x,b_y], p)
-
-            #If it's close enough, let's check where it will land
-            if dist<config.dl*2*config.r and bubbles[i][j]!=0:
-                #Check Around the bubble
-                flag_attach, bubbles=check_around(bubbles,i,j,p,[b_x,b_y], bubble_in_play)
-                
-                #The bubble can't attach around, game ends
-                if flag_attach == True:
-                    around=False
-                    break
-                return bubbles, flag_attach, game
-    
-    #Checks if it can attach to the top of the board
-    if p[1]>ggraph.SIZE_BOARD and p[1] <ggraph.SIZE_BOARD+config.r and flag_attach==True:
-        x=int (round((p[0]/(2*config.r)),0))
-        if bubbles[0][x]==0:
-            bubbles[0][x]= bubble_in_play[1]
-    elif around==False:
-        game=False
-    #It isn't close enough to any bubble
-    return bubbles, flag_attach, game
-
-
 
 #----------------------------------------------
 # Function: 
@@ -208,26 +180,96 @@ def calculate_distance(p1,p2):
 # Function: 
 # Input:
 # Output: 
-def check_around(bubbles,i,j,z,b, bubble_in_play):
-    flag_attach=True
-    #To the right
-    if j+1<len(bubbles[0]) and flag_attach and  z[1]>=(-z[0]+b[0]+b[1]) and z[1]<=(z[0]-b[0]+b[1]) and bubbles[i][j+1]==0:
-            bubbles[i][j+1]= bubble_in_play[1]
-            flag_attach=False
+def is_first_line(x,y, config, bubbles, bubble_in_play):
+    if ggraph.SIZE_BOARD<=y<=ggraph.SIZE_BOARD+2*config.r: #is in the first line
+        position= int(x / (2*config.r))
+        if bubbles [0][position]==0:
+            bubbles[0][position]= bubble_in_play[1]
+        return True
+    return False
 
-    #Below
-    if i+1<len(bubbles[:,0]) and flag_attach and z[1]>=(-z[0]+b[0]+b[1]) and z[1]>=(z[0]-b[0]+b[1])and bubbles[i+1][j]==0:
-            bubbles[i+1][j] = bubble_in_play[1]
-            flag_attach=False
 
-    #To the left
-    if j-1>=0 and flag_attach and z[1]<=(-z[0]+b[0]+b[1]) and z[1]>=(z[0]-b[0]+b[1])and bubbles[i][j-1]==0:
-            bubbles[i][j-1] = bubble_in_play[1]
-            flag_attach=False
 
-    #Above
-    if i-1>=0 and flag_attach and  z[1]<=(-z[0]+b[0]+b[1]) and z[1]<=(z[0]-b[0]+b[1])and bubbles[i-1][j]==0:
-            bubble_in_play[i-1][j] = bubble_in_play[1]
-            flag_attach=False
+#----------------------------------------------
+# Function: 
+# Input:
+# Output:
+def collision(bubbles,position_launched, bubble_in_play, config):
+    collide_dist=[]
+    collide_pos=[]
+    pre_collide_pos=[]
+    boom=False
+    launched = True
+    game= True
+    #Go through board
+    for i in range (len(bubbles[:,0])):
+        for j in range (len(bubbles[0])):
+            if bubbles[i][j]!=0:
+                #Position of the bubble we are comparing
+                position_bubble=[2*config.r*j + config.r, 2*config.r*i + config.r + ggraph.SIZE_BOARD]
+                #Calculate distance between two bubbles
+                dist=calculate_distance(position_launched,position_bubble)
+                #There is a collision
+                if dist < (2*config.r*config.dl):
+                    #Save information
+                    collide_dist.append(dist)
+                    collide_pos.append([i,j])
+                    pre_collide_pos.append(position_launched)
+                    boom= True
+                    print('BOOM!!!',i,j,dist, position_bubble)
     
-    return flag_attach, bubbles
+    #See which position is the closest
+    if boom == True:
+        print(collide_dist, collide_pos)
+        index=collide_dist.index(min(collide_dist))
+        #Where to attach the next bubble
+        bubbles, launched, game=collision_where(collide_pos[index], bubble_in_play, bubbles, config, pre_collide_pos[index] )
+    
+    return bubbles, launched, game
+
+
+
+#----------------------------------------------
+# Function: 
+# Input:
+# Output:
+def collision_where(collide_pos, bubble_in_play, bubbles, config, position):
+    i=collide_pos[0]
+    j=collide_pos[1]
+    b=[2*config.r*j + config.r, 2*config.r*i + config.r + ggraph.SIZE_BOARD]
+    launched=True
+    game= True
+    #Attach
+    
+    #To the right
+    if j+1<len(bubbles[0]) and  position[1]>=(-position[0]+b[0]+b[1]) and position[1]<=(position[0]-b[0]+b[1]) and bubbles[i][j+1]==0:
+        bubbles[i][j+1]= bubble_in_play
+        launched= False
+        print('Right')
+    
+    #Below
+    elif i+1<len(bubbles[:,0]) and position[1]>=(-position[0]+b[0]+b[1]) and position[1]>=(position[0]-b[0]+b[1])and bubbles[i+1][j]==0:
+        bubbles[i+1][j] = bubble_in_play
+        launched= False
+        print('Below')
+    
+    #To the left
+    elif j-1>=0  and position[1]<=(-position[0]+b[0]+b[1]) and position[1]>=(position[0]-b[0]+b[1])and bubbles[i][j-1]==0:
+        bubbles[i][j-1] = bubble_in_play
+        launched= False
+        print('Left')
+    
+    #Above
+    elif i-1>=0 and  position[1]<=(-position[0]+b[0]+b[1]) and position[1]<=(position[0]-b[0]+b[1])and bubbles[i-1][j]==0:
+        bubbles[i-1][j] = bubble_in_play
+        launched= False
+        print('Above')
+    else:
+        #The ball would attach in the last line
+        #if i+1==len(bubbles[:,0]) and (bubbles[i][j+1]!=0 or bubbles[i][j-1]!=0 or bubbles[i-1][j]!=0):
+        print('Game Over')
+        return bubbles, False, False
+    
+        #print("I'm dumb, I can't attach")
+    
+    return bubbles, launched, game
