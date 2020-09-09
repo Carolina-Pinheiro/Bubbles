@@ -5,7 +5,6 @@
 import classes
 
 
-
 #----------------------------------------------
 # Function: initializes the pre game
 # Input: ---
@@ -55,6 +54,7 @@ def initialize_specs(specs):
     if isinstance(width/(2*r),int) == False:
         width= int(width/(2*r))*2*r
 
-    initial_config= classes.config(height, width, r, dl, initial_lines, N)
+    screen=0 #just a placehold
+    initial_config= classes.config(height, width, r, dl, initial_lines, N, screen)
     
     return initial_config
