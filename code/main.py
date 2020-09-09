@@ -10,18 +10,25 @@ import in_game as ingame
 import classes
 import pygame
 import numpy as np
+import random
+import time
 
 #Main
 config= pap.pre_init()
 config=ggraph.init_window(config)
 bubbles=ingame.init_board(config)
+
+bubble_in_play=[classes.bubble(config.r, config.height+ggraph.SIZE_BOARD-config.r, random.randrange(1,10) ),
+                classes.bubble(int(config.width/2), config.height+ggraph.SIZE_BOARD-config.r, random.randrange(1,10))]
+
+print(bubble_in_play)
 game= True
-bubble_in_play = np.random.randint(1,10,2)
 launched=False
 attached=False
 
 #Game Loop
 while game:
+    
     #White Background 
     config.screen.fill((255,255,255))
 
@@ -30,28 +37,36 @@ while game:
 
     #Draw Bubbles
     ggraph.draw_bubbles(config, bubbles)
-    (x,y), alpha=ingame.line(config)
-    ggraph.draw_line(config, (x,y), alpha)
-    ggraph.draw_next_bubble(config,bubble_in_play)
+    
+    ggraph.draw_next_bubble(config,bubble_in_play[0])
 
     #If a bubble is not in movement
     if launched == False:
+        bubble_in_play[1].x=int(config.width/2)
+        bubble_in_play[1].y=config.height+ggraph.SIZE_BOARD-config.r
+        (x,y), alpha=ingame.line(config)
+        ggraph.draw_line(config, (x,y), alpha)
         #Center bubble coordinates
         bubble_x=int(config.width/2)
         bubble_y=config.height+ggraph.SIZE_BOARD-config.r
             #Draw bubble
-        ggraph.draw_one_bubble(config,bubble_in_play[1],(int(config.width/2), config.height+ggraph.SIZE_BOARD-config.r))
+        ggraph.draw_one_bubble(config,bubble_in_play[1])
         #Reset Variables, after a succesfull launch
         attached=False
         
         #Events
+        
+
         game, new_game, launched=ingame.events(controls, alpha, config, bubble_in_play)
+        if game == True:
+            game=ingame.game_over(bubbles)
     else:
-        [bubble_x,bubble_y], launched, bubble_in_play, bubbles, attached, game = ggraph.launch_bubble(config, alpha, bubble_in_play, [bubble_x,bubble_y], bubbles, attached)
+        launched, bubble_in_play, bubbles, attached, alpha = ggraph.launch_bubble(config, alpha, bubble_in_play, bubbles, attached)
     
     #New Game button was clicked
     if new_game == True:
         bubbles=ingame.init_board(config)
+
     
     #Update Screen
     pygame.display.update()
@@ -60,6 +75,7 @@ while game:
 #Game Over Screen
 game_over=True
 score=0
+time.sleep(1)
 while game_over:
     config.screen.fill((255,255,255))
     ggraph.game_over_screen(config, score)
