@@ -8,6 +8,8 @@ class config:
         self.initial_lines= initial_lines
         self.N_moves= N_moves
         self.screen= screen
+        self.score=0
+        self.number_plays=0
 
 #Bubble Class
 class bubble:
@@ -15,6 +17,7 @@ class bubble:
         self.x=x
         self.y=y
         self.color= color 
+        self.checked= False
 
 #Bubble Moving Class
 class bubble_moving:
@@ -24,3 +27,5 @@ class bubble_moving:
         self.color= color
         self.angle = angle
         self.launched = launched
+        self.i=0
+        self.j=0

@@ -23,7 +23,7 @@ bubble_in_play=[classes.bubble(config.r, config.height+ggraph.SIZE_BOARD-config.
 
 
 game= True
-
+score=0
 #Game Loop
 while game:
     #White Background 
@@ -46,14 +46,14 @@ while game:
         ggraph.draw_one_bubble(config,bubble_in_play[1])
         
         #Events
-        game, bubbles=ingame.events(controls, config, bubble_in_play, alpha, bubbles)
+        game=ingame.events(controls, config, bubble_in_play, alpha, bubbles)
         
         #Check if it is a game over
         if game == True:
             game=ingame.game_over(bubbles)
     else:
         #Ball is in movement
-        bubble_in_play, bubbles= ggraph.launch_bubble(config, bubble_in_play, bubbles)
+        ggraph.launch_bubble(config, bubble_in_play, bubbles)
     
     #Update Screen
     pygame.display.update()
