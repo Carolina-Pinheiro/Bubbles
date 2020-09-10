@@ -50,11 +50,10 @@ def control_board( config):
     controls.append(pygame.Rect (0.70*config.width, 0.1*SIZE_BOARD, 0.28*config.width, 0.8*SIZE_BOARD ) )
     
     #TextSurface
-    score=0
     myfont = pygame.font.SysFont('lucidaconsole', int(SIZE_BOARD/2))
     surfaces.append( myfont.render('New Game', False, (0,0,0)) )
     surfaces.append( myfont.render('End Game', False, (0,0,0)) )
-    surfaces.append( myfont.render('Score: '+ str(score), False, (0,0,0)) )
+    surfaces.append( myfont.render('Score: '+ str(config.score), False, (0,0,0)) )
     
     #Draw Rectangles
     for button in controls:
@@ -173,15 +172,20 @@ def launch_bubble(config,  bubble_in_play, bubbles):
             ingame.is_first_line(config, bubbles, bubble_in_play[1])
             #Is not in the first line, detect collision
             if bubble_in_play[1].launched == True: 
-                bubbles=ingame.collision(bubbles, bubble_in_play[1], config)
+                ingame.collision(bubbles, bubble_in_play[1], config)
         
         if bubble_in_play[1].launched == False:
+            pop_list=[[bubble_in_play[1].i, bubble_in_play[1].j]]
+            pop_list=ingame.pop_bubble(bubbles, bubble_in_play[1].color, bubble_in_play[1].i, bubble_in_play[1].j, pop_list)
+            
+            print(pop_list)
+            ingame.clean_board(bubbles, pop_list, config)
+            pop_list=[]
             ingame.bubble_in_play(bubble_in_play, config)
-        
-        return  bubble_in_play, bubbles
+            
+        return 
     bubble_in_play[1].launched = False
     ingame.bubble_in_play(bubble_in_play, config)
-    return   bubble_in_play, bubbles
 
 
 
@@ -197,7 +201,7 @@ def game_over_screen(config,score):
     surfaces.append( myfont.render('Game Over', False, (0,0,0)) )
 
     myfont = pygame.font.SysFont('lucidaconsole', int(0.75*SIZE_BOARD))
-    surfaces.append( myfont.render('Score: '+ str(score), False, (0,0,0)) )
+    surfaces.append( myfont.render('Score: '+ str(config.score), False, (0,0,0)) )
     surfaces.append( myfont.render('Click to close ', False, (0,0,0)) )
     
     #Draw Text
