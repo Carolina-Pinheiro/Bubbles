@@ -157,32 +157,31 @@ def draw_one_bubble( config, bubble):
 # Function:
 # Input: 
 # Output: ---
-def launch_bubble(config, alpha, bubble_in_play, bubbles, attached):
-    launched=True
+def launch_bubble(config,  bubble_in_play, bubbles):
     
     #Bubble is within the board
     if (bubble_in_play[1].x>0 and bubble_in_play[1].x<config.width and bubble_in_play[1].y>SIZE_BOARD+config.r and bubble_in_play[1].y<config.height+SIZE_BOARD):
-        alpha=bounce_wall(bubble_in_play[1].x, config, alpha)
+        bounce_wall(bubble_in_play[1], config)
         
-        bubble_in_play[1].x+= int(config.r*math.cos(alpha))
-        bubble_in_play[1].y-= int(config.r*math.sin(alpha))
-        time.sleep(0.025)
+        bubble_in_play[1].x+= int(config.r*math.cos(bubble_in_play[1].angle))
+        bubble_in_play[1].y-= int(config.r*math.sin(bubble_in_play[1].angle))
+        time.sleep(0.02)
 
         draw_one_bubble(config,bubble_in_play[1])
         #collision
-        if attached== False:
-            attached=ingame.is_first_line(config, bubbles, bubble_in_play[1])
+        if bubble_in_play[1].launched== True:
+            ingame.is_first_line(config, bubbles, bubble_in_play[1])
             #Is not in the first line, detect collision
-            if attached == False: 
-                bubbles, launched=ingame.collision(bubbles, bubble_in_play[1], config)
+            if bubble_in_play[1].launched == True: 
+                bubbles=ingame.collision(bubbles, bubble_in_play[1], config)
         
-        if launched == False:
-            ingame.bubble_in_play(bubble_in_play)
+        if bubble_in_play[1].launched == False:
+            ingame.bubble_in_play(bubble_in_play, config)
         
-        return launched, bubble_in_play, bubbles, attached,  alpha
-    launched=False
-    ingame.bubble_in_play(bubble_in_play)
-    return  launched, bubble_in_play, bubbles, attached, alpha
+        return  bubble_in_play, bubbles
+    bubble_in_play[1].launched = False
+    ingame.bubble_in_play(bubble_in_play, config)
+    return   bubble_in_play, bubbles
 
 
 
@@ -212,13 +211,8 @@ def game_over_screen(config,score):
 # Function: 
 # Input: 
 # Output: 
-def bounce_wall(position, config, alpha):
-    if position>0 and position<config.r:
-        print(alpha)
-        alpha= alpha- (math.pi/4)
-        print(alpha)
-    elif position<config.width and position > config.width - config.r:
-        alpha= alpha + math.pi /4
-    return alpha
-
+def bounce_wall(bubble_in_play, config):
+    position = bubble_in_play.x
+    if (position>0 and position<config.r) or (position<config.width and position > config.width - config.r):
+        bubble_in_play.angle= math.pi -bubble_in_play.angle
 
