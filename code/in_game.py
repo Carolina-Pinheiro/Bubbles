@@ -55,7 +55,7 @@ def init_board(config):
 # Function: handles the pygame events
 # Input: controls -> list that contains the button's position in a rect object
 # Output: game-> True while game is running, new_game-> True when a new game is created
-def events(controls, alpha, config, bubble_in_play):
+def events(controls, config, bubble_in_play, alpha, bubbles):
     game=True
     new_game= False
     launched = False
@@ -70,11 +70,16 @@ def events(controls, alpha, config, bubble_in_play):
             pos = pygame.mouse.get_pos()
             #Check if any buttons were pressed
             game, new_game= ggraph.check_buttons(controls, pos)
+            if new_game== True:
+                bubbles=init_board(config)
+                return game, bubbles
             if pos[1]>ggraph.SIZE_BOARD:
-                launched= True
-                return game, new_game, launched
+                bubble_in_play[1].launched = True
+                #Define anlge of launch, if needed
+                bubble_in_play[1].angle= alpha
+                return game, bubbles
     
-    return game, new_game, launched
+    return game, bubbles
 
 
 
@@ -123,8 +128,10 @@ def pick_color(bubble):
 # Function: 
 # Input:
 # Output: 
-def bubble_in_play(bubble_in_play):
+def bubble_in_play(bubble_in_play, config):
     bubble_in_play[1].color= bubble_in_play[0].color
+    bubble_in_play[1].x=int(config.width/2)
+    bubble_in_play[1].y=config.height+ggraph.SIZE_BOARD-config.r
     bubble_in_play[0].color=random.randrange(1,10)
 
 
@@ -191,9 +198,9 @@ def is_first_line(config, bubbles, bubble_in_play):
         position= int(bubble_in_play.x / (2*config.r))
         if bubbles [0][position].color==0:
             bubbles[0][position].color= bubble_in_play.color
-        return True
-    return False
-
+        bubble_in_play.launched = False
+        return
+    bubble_in_play.launched = True
 
 
 #----------------------------------------------
@@ -205,7 +212,6 @@ def collision(bubbles, bubble_in_play, config):
     collide_pos=[]
     pre_collide_pos=[]
     boom=False
-    launched = True
     game= True
     #Go through board
     for i in range (len(bubbles[:,0])):
@@ -227,10 +233,9 @@ def collision(bubbles, bubble_in_play, config):
         print(collide_dist, collide_pos)
         index=collide_dist.index(min(collide_dist))
         #Where to attach the next bubble
-        bubbles, launched=collision_where(collide_pos[index], bubble_in_play, bubbles, config, pre_collide_pos[index] )
+        bubbles=collision_where(collide_pos[index], bubble_in_play, bubbles, config, pre_collide_pos[index] )
     
-    return bubbles, launched
-
+    return bubbles
 
 
 #----------------------------------------------
@@ -241,35 +246,34 @@ def collision_where(collide_pos, bubble_in_play, bubbles, config, position):
     i=collide_pos[0]
     j=collide_pos[1]
     b=[bubbles[i][j].x, bubbles[i][j].y]
-    launched=True
     game= True
     #Attach
     
     #To the right
     if j+1<len(bubbles[0]) and  position[1]>=(-position[0]+b[0]+b[1]) and position[1]<=(position[0]-b[0]+b[1]) and bubbles[i][j+1].color==0:
         bubbles[i][j+1].color= bubble_in_play.color
-        launched= False
+        bubble_in_play.launched= False
         print('Right')
     
     #Below
     elif position[1]>=(-position[0]+b[0]+b[1]) and position[1]>=(position[0]-b[0]+b[1])and bubbles[i+1][j].color==0:
         bubbles[i+1][j].color = bubble_in_play.color
-        launched= False
+        bubble_in_play.launched = False
         print('Below')
     
     #To the left
     elif j-1>=0  and position[1]<=(-position[0]+b[0]+b[1]) and position[1]>=(position[0]-b[0]+b[1])and bubbles[i][j-1].color==0:
         bubbles[i][j-1].color = bubble_in_play.color
-        launched= False
+        bubble_in_play.launched= False
         print('Left')
     
     #Above
     elif i-1>=0 and  position[1]<=(-position[0]+b[0]+b[1]) and position[1]<=(position[0]-b[0]+b[1])and bubbles[i-1][j].color==0:
         bubbles[i-1][j].color = bubble_in_play.color
-        launched= False
+        bubble_in_play.launched= False
         print('Above')
     
-    return bubbles, launched
+    return bubbles
 
 
 
