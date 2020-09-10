@@ -19,12 +19,10 @@ config=ggraph.init_window(config)
 bubbles=ingame.init_board(config)
 
 bubble_in_play=[classes.bubble(config.r, config.height+ggraph.SIZE_BOARD-config.r, random.randrange(1,10) ),
-                classes.bubble_moving(int(config.width/2), config.height+ggraph.SIZE_BOARD-config.r, random.randrange(1,10), 0)]
+                classes.bubble_moving(int(config.width/2), config.height+ggraph.SIZE_BOARD-config.r, random.randrange(1,10), 0, False)]
 
-print(bubble_in_play)
+
 game= True
-launched=False
-attached=False
 
 #Game Loop
 while game:
@@ -39,7 +37,7 @@ while game:
     ggraph.draw_next_bubble(config,bubble_in_play[0])
 
     #If a bubble is not in movement
-    if launched == False:
+    if bubble_in_play[1].launched == False:
         #Pointer
         (x,y), alpha=ingame.line(config)
         ggraph.draw_line(config, (x,y), alpha)
@@ -47,18 +45,15 @@ while game:
         #Draw bubble
         ggraph.draw_one_bubble(config,bubble_in_play[1])
         
-        #Reset Variables, after a succesfull launch
-        attached=False
-        
         #Events
-        game, bubbles, launched=ingame.events(controls, config, bubble_in_play, alpha, bubbles)
+        game, bubbles=ingame.events(controls, config, bubble_in_play, alpha, bubbles)
         
         #Check if it is a game over
         if game == True:
             game=ingame.game_over(bubbles)
     else:
         #Ball is in movement
-        launched, bubble_in_play, bubbles, attached = ggraph.launch_bubble(config, bubble_in_play, bubbles, attached)
+        bubble_in_play, bubbles= ggraph.launch_bubble(config, bubble_in_play, bubbles)
     
     #Update Screen
     pygame.display.update()

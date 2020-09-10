@@ -15,3 +15,12 @@ class bubble:
         self.x=x
         self.y=y
         self.color= color 
+
+#Bubble Moving Class
+class bubble_moving:
+    def __init__(self,x,y,color, angle, launched):
+        self.x=x
+        self.y=y
+        self.color= color
+        self.angle = angle
+        self.launched = launched
