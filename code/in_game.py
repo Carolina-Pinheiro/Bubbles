@@ -29,11 +29,8 @@ def game_loop(bubbles, bubble_in_play, launched, attached, game, config):
 def init_board(config):
     #Generate game board
     n_bubbles = int (config.width / (2*config.r))
-    print(config.initial_lines, n_bubbles )
-
     #Calculate the max number of lines
     max_lines= int(config.height/(2*config.r) ) -config.initial_lines -1
-    print(max_lines)
     #Create Matrix
     bubbles= np.empty((max_lines+config.initial_lines, n_bubbles ), dtype=classes.bubble)
     
@@ -72,14 +69,15 @@ def events(controls, config, bubble_in_play, alpha, bubbles):
             game, new_game= ggraph.check_buttons(controls, pos)
             if new_game== True:
                 bubbles=init_board(config)
+                config.score=00
                 return game, bubbles
             if pos[1]>ggraph.SIZE_BOARD:
                 bubble_in_play[1].launched = True
                 #Define anlge of launch, if needed
                 bubble_in_play[1].angle= alpha
-                return game, bubbles
+                return game
     
-    return game, bubbles
+    return game
 
 
 
@@ -198,6 +196,7 @@ def is_first_line(config, bubbles, bubble_in_play):
         position= int(bubble_in_play.x / (2*config.r))
         if bubbles [0][position].color==0:
             bubbles[0][position].color= bubble_in_play.color
+        bubble_in_play.j=position
         bubble_in_play.launched = False
         return
     bubble_in_play.launched = True
@@ -226,16 +225,13 @@ def collision(bubbles, bubble_in_play, config):
                     collide_pos.append([i,j])
                     pre_collide_pos.append([bubble_in_play.x, bubble_in_play.y])
                     boom= True
-                    print('BOOM!!!',i,j,dist)
     
     #See which position is the closest
     if boom == True:
-        print(collide_dist, collide_pos)
         index=collide_dist.index(min(collide_dist))
         #Where to attach the next bubble
         bubbles=collision_where(collide_pos[index], bubble_in_play, bubbles, config, pre_collide_pos[index] )
     
-    return bubbles
 
 
 #----------------------------------------------
@@ -252,30 +248,74 @@ def collision_where(collide_pos, bubble_in_play, bubbles, config, position):
     #To the right
     if j+1<len(bubbles[0]) and  position[1]>=(-position[0]+b[0]+b[1]) and position[1]<=(position[0]-b[0]+b[1]) and bubbles[i][j+1].color==0:
         bubbles[i][j+1].color= bubble_in_play.color
+        bubble_in_play.i=i
+        bubble_in_play.j=j+1
         bubble_in_play.launched= False
-        print('Right')
     
     #Below
     elif position[1]>=(-position[0]+b[0]+b[1]) and position[1]>=(position[0]-b[0]+b[1])and bubbles[i+1][j].color==0:
         bubbles[i+1][j].color = bubble_in_play.color
+        bubble_in_play.i=i+1
+        bubble_in_play.j=j
         bubble_in_play.launched = False
-        print('Below')
     
     #To the left
     elif j-1>=0  and position[1]<=(-position[0]+b[0]+b[1]) and position[1]>=(position[0]-b[0]+b[1])and bubbles[i][j-1].color==0:
         bubbles[i][j-1].color = bubble_in_play.color
+        bubble_in_play.i=i
+        bubble_in_play.j=j-1
         bubble_in_play.launched= False
-        print('Left')
     
     #Above
     elif i-1>=0 and  position[1]<=(-position[0]+b[0]+b[1]) and position[1]<=(position[0]-b[0]+b[1])and bubbles[i-1][j].color==0:
         bubbles[i-1][j].color = bubble_in_play.color
+        bubble_in_play.i=i-1
+        bubble_in_play.j=j
         bubble_in_play.launched= False
-        print('Above')
     
     return bubbles
 
 
+
+#----------------------------------------------
+# Function: 
+# Input:
+# Output:
+def pop_bubble(bubbles, color, i,j, pop_list):
+    #print(i,j)
+    bubbles[i][j].checked= True
+
+    if j+1<len(bubbles[0]) and bubbles[i][j+1].color== color and bubbles[i][j+1].checked == False:
+        pop_list.append([i,j+1])
+        pop_list=pop_bubble(bubbles, color, i, j+1, pop_list)
+        
+
+    if bubbles[i+1][j].color == color and bubbles[i+1][j].checked == False:
+        pop_list.append([i+1,j])
+        pop_list=pop_bubble(bubbles, color, i+1, j, pop_list)
+
+    if bubbles[i][j-1].color == color and bubbles[i][j-1].checked == False:
+        pop_list.append([i,j-1])
+        pop_list=pop_bubble(bubbles, color, i, j-1, pop_list)
+
+    if bubbles[i-1][j].color == color and bubbles[i-1][j].checked == False:
+        pop_list.append([i-1,j])
+        pop_list=pop_bubble(bubbles, color, i-1, j, pop_list)
+
+    return pop_list
+
+
+
+#----------------------------------------------
+# Function: 
+# Input:
+# Output:
+def clean_board(bubbles, pop_list, config):
+    for [i,j] in pop_list:
+        if len(pop_list)>=3:
+            bubbles[i][j].color=0
+            config.score = config.score + 1
+        bubbles[i][j].checked = False
 
 #----------------------------------------------
 # Function: 
@@ -288,4 +328,6 @@ def game_over(bubbles):
             print('Game Over')
             return False
     return True
+
+
 
