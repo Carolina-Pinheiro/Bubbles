@@ -178,7 +178,6 @@ def launch_bubble(config,  bubble_in_play, bubbles):
             pop_list=[[bubble_in_play[1].i, bubble_in_play[1].j]]
             pop_list=ingame.pop_bubble(bubbles, bubble_in_play[1].color, bubble_in_play[1].i, bubble_in_play[1].j, pop_list)
             
-            print(pop_list)
             ingame.clean_board(bubbles, pop_list, config)
             pop_list=[]
             ingame.bubble_in_play(bubble_in_play, config)

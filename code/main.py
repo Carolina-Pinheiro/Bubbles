@@ -15,6 +15,10 @@ import time
 
 #Main
 config= pap.pre_init()
+
+#Check config
+##########################
+
 config=ggraph.init_window(config)
 bubbles=ingame.init_board(config)
 
@@ -46,17 +50,20 @@ while game:
         ggraph.draw_one_bubble(config,bubble_in_play[1])
         
         #Events
+        bubbles=ingame.check_num_plays(config, bubbles)
         game=ingame.events(controls, config, bubble_in_play, alpha, bubbles)
         
         #Check if it is a game over
         if game == True:
             game=ingame.game_over(bubbles)
+        
     else:
         #Ball is in movement
         ggraph.launch_bubble(config, bubble_in_play, bubbles)
     
     #Update Screen
     pygame.display.update()
+    
 
 
 #Game Over Screen
@@ -73,3 +80,6 @@ while game_over:
             game_over= False
         if pygame.mouse.get_pressed()==(True,False,False):
             game_over=False
+
+#Write in the results file
+##################################3

@@ -69,11 +69,12 @@ def events(controls, config, bubble_in_play, alpha, bubbles):
             game, new_game= ggraph.check_buttons(controls, pos)
             if new_game== True:
                 bubbles=init_board(config)
-                config.score=00
+                config.score=0
                 return game, bubbles
             if pos[1]>ggraph.SIZE_BOARD:
                 bubble_in_play[1].launched = True
-                #Define anlge of launch, if needed
+                #Define anlge of launch
+                config.number_plays+= 1
                 bubble_in_play[1].angle= alpha
                 return game
     
@@ -196,10 +197,12 @@ def is_first_line(config, bubbles, bubble_in_play):
         position= int(bubble_in_play.x / (2*config.r))
         if bubbles [0][position].color==0:
             bubbles[0][position].color= bubble_in_play.color
-        bubble_in_play.j=position
-        bubble_in_play.launched = False
+            bubble_in_play.j=position
+            bubble_in_play.i=0
+            bubble_in_play.launched = False
         return
     bubble_in_play.launched = True
+
 
 
 #----------------------------------------------
@@ -231,7 +234,7 @@ def collision(bubbles, bubble_in_play, config):
         index=collide_dist.index(min(collide_dist))
         #Where to attach the next bubble
         bubbles=collision_where(collide_pos[index], bubble_in_play, bubbles, config, pre_collide_pos[index] )
-    
+
 
 
 #----------------------------------------------
@@ -288,9 +291,8 @@ def pop_bubble(bubbles, color, i,j, pop_list):
     if j+1<len(bubbles[0]) and bubbles[i][j+1].color== color and bubbles[i][j+1].checked == False:
         pop_list.append([i,j+1])
         pop_list=pop_bubble(bubbles, color, i, j+1, pop_list)
-        
 
-    if bubbles[i+1][j].color == color and bubbles[i+1][j].checked == False:
+    if i+1<len(bubbles[:,0]) and bubbles[i+1][j].color == color and bubbles[i+1][j].checked == False:
         pop_list.append([i+1,j])
         pop_list=pop_bubble(bubbles, color, i+1, j, pop_list)
 
@@ -311,6 +313,7 @@ def pop_bubble(bubbles, color, i,j, pop_list):
 # Input:
 # Output:
 def clean_board(bubbles, pop_list, config):
+    print(pop_list)
     for [i,j] in pop_list:
         if len(pop_list)>=3:
             bubbles[i][j].color=0
@@ -331,3 +334,31 @@ def game_over(bubbles):
 
 
 
+#----------------------------------------------
+# Function: 
+# Input:
+# Output:
+def check_num_plays(config, bubbles):
+    if config.number_plays == config.N_moves:
+        print('new line')
+
+        #Generate a new line
+        lines=(int(config.width/(2*config.r)))
+        new_line= np.empty((lines ,1), dtype=classes.bubble)
+            #Fill array 
+        for j in range(len(new_line)):
+            new_line[j]=classes.bubble(j*2*config.r + config.r, config.r + ggraph.SIZE_BOARD, random.randrange(1,10))
+        #Move all lines one down
+        for i in range (len(bubbles[:,0])-1,0, -1):
+            for j in range(len (bubbles[0])):
+                bubbles[i][j].color=bubbles[i-1][j].color
+
+        #for bubble in bubbles[0]:
+        #    print(bubble.color)
+        #Add new line to the matrix
+        bubbles[0]=new_line.T
+        for i, bubble in enumerate(bubbles[0]):
+            print(bubble.color)
+
+        config.number_plays=0
+    return bubbles
