@@ -70,16 +70,26 @@ while game:
 game_over=True
 score=0
 time.sleep(0.75)
+name=''
+
 while game_over:
     config.screen.fill((255,255,255))
     ggraph.game_over_screen(config, score)
-    pygame.display.update()
+    myfont = pygame.font.SysFont('lucidaconsole', int(0.75*ggraph.SIZE_BOARD))
+    get_input=True
+
     for event in pygame.event.get():
         #Close Window
         if event.type == pygame.QUIT:
             game_over= False
-        if pygame.mouse.get_pressed()==(True,False,False):
-            game_over=False
+        #Get input text
+        if event.type == pygame.KEYDOWN:
+            name, game_over=pap.text_input(event,name)
+    
+    surface= myfont.render(str(name), False, (0,0,0))
+    config.screen.blit(surface,(int(0.10*config.width), int(0.5*config.height)) )
+    pygame.display.update()
+
 
 #Write in the results file
-##################################3
+pap.write_results(name, config.score)
