@@ -164,7 +164,7 @@ def launch_bubble(config,  bubble_in_play, bubbles):
         
         bubble_in_play[1].x+= int(config.r*math.cos(bubble_in_play[1].angle))
         bubble_in_play[1].y-= int(config.r*math.sin(bubble_in_play[1].angle))
-        time.sleep(0.02)
+        time.sleep(0.01)
 
         draw_one_bubble(config,bubble_in_play[1])
         #collision
@@ -201,12 +201,13 @@ def game_over_screen(config,score):
 
     myfont = pygame.font.SysFont('lucidaconsole', int(0.75*SIZE_BOARD))
     surfaces.append( myfont.render('Score: '+ str(config.score), False, (0,0,0)) )
-    surfaces.append( myfont.render('Click to close ', False, (0,0,0)) )
+    surfaces.append( myfont.render('Insert Name', False, (0,0,0)) )
     
     #Draw Text
-    config.screen.blit(surfaces[0],(0.10*config.width, 0.5*config.height) )
-    config.screen.blit(surfaces[1],(0.10*config.width, 0.6*config.height) )
-    config.screen.blit(surfaces[2],(0.10*config.width, 0.7*config.height) )
+    config.screen.blit(surfaces[0],(int(0.10*config.width), int(0.2*config.height) ))
+    config.screen.blit(surfaces[1],(int(0.10*config.width), int(0.3*config.height) ))
+    config.screen.blit(surfaces[2],(int(0.10*config.width), int(0.4*config.height) ))
+
 
 
 
