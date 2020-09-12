@@ -3,7 +3,8 @@
 # Function: Deals with things that happen before and after the game itself
 
 import classes
-
+from operator import itemgetter
+import pygame
 
 #----------------------------------------------
 # Function: initializes the pre game
@@ -58,3 +59,54 @@ def initialize_specs(specs):
     initial_config= classes.config(height, width, r, dl, initial_lines, N, screen)
     
     return initial_config
+
+
+
+#----------------------------------------------
+# Function: initializes the config class with the specs given
+# Input: specs -> list of specs
+# Output: initial_config -> config class filled
+def write_results(players_name, players_score):
+    print(players_name)
+    #Open File and write
+    results=open(r'C:\Users\cppin\Desktop\GitHub\Bubbles\results.txt', 'a')
+    results.write(str(players_name) + ' '+ str(players_score) +'\n')
+    results.close()
+    
+    #Open File and read
+    results=open(r'C:\Users\cppin\Desktop\GitHub\Bubbles\results.txt')
+    lines=results.readlines()
+    results.close()
+    results_list=[]
+    for line in lines:
+        info=line.split()
+        name=info[0]
+        score=int(info[1])
+        results_list.append((name, score))
+    results_list.sort(key=itemgetter(1), reverse=True)
+    
+    #Open File and write in order
+    results=open(r'C:\Users\cppin\Desktop\GitHub\Bubbles\results.txt', 'w')
+    for (name, score) in results_list:
+        results.write(name +' ' + str(score) + '\n')
+
+
+
+#----------------------------------------------
+# Function: initializes the config class with the specs given
+# Input: specs -> list of specs
+# Output: initial_config -> config class filled
+def text_input(event, name):
+    flag=True
+    if event.key == pygame.K_RETURN:
+        flag=False
+    elif event.key == pygame.K_BACKSPACE:
+        name = name[:-1]
+    elif event.key == pygame.K_SPACE:
+        print('Espaço não, cara')
+    else:
+        name += event.unicode
+    if flag == True:
+        return name, True
+    else:
+        return name, False
