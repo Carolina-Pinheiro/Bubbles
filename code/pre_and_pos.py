@@ -3,8 +3,8 @@
 # Function: Deals with things that happen before and after the game itself
 
 import classes
+
 from operator import itemgetter
-import pygame
 
 #----------------------------------------------
 # Function: initializes the pre game
@@ -63,9 +63,9 @@ def initialize_specs(specs):
 
 
 #----------------------------------------------
-# Function: initializes the config class with the specs given
-# Input: specs -> list of specs
-# Output: initial_config -> config class filled
+# Function: 
+# Input: 
+# Output: 
 def write_results(players_name, players_score):
     #Open File and write
     results=open(r'C:\Users\cppin\Desktop\GitHub\Bubbles\results.txt', 'a')
