@@ -164,7 +164,7 @@ def launch_bubble(config,  bubble_in_play, bubbles):
         
         bubble_in_play[1].x+= int(config.r*math.cos(bubble_in_play[1].angle))
         bubble_in_play[1].y-= int(config.r*math.sin(bubble_in_play[1].angle))
-        time.sleep(0.01)
+        time.sleep(0.001)
 
         draw_one_bubble(config,bubble_in_play[1])
         #collision

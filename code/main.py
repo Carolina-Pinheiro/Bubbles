@@ -25,13 +25,15 @@ bubbles=ingame.init_board(config)
 bubble_in_play=[classes.bubble(config.r, config.height+ggraph.SIZE_BOARD-config.r, random.randrange(1,10) ),
                 classes.bubble_moving(int(config.width/2), config.height+ggraph.SIZE_BOARD-config.r, random.randrange(1,10), 0, False)]
 
-
+background = pygame.image.load('./images/fundo.jpg')
 game= True
 score=0
 #Game Loop
 while game:
     #White Background 
     config.screen.fill((255,255,255))
+    background_sized= pygame.transform.scale(background, (config.width, config.height))
+    config.screen.blit(background_sized, (0, ggraph.SIZE_BOARD))
 
     #Draw Control Board
     controls=ggraph.control_board(config)
