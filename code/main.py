@@ -8,9 +8,9 @@ import pre_and_pos as pap
 import game_graphics as ggraph
 import in_game as ingame
 import classes
+
 import pygame
 import numpy as np
-import random
 import time
 
 #######
