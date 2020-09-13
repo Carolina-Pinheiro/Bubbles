@@ -51,9 +51,9 @@ def check_config(config):
             config.r=35
     
     #Coliding distance (percentage of diameter)
-    if (0.95<= config.dl <= 1.2) == False: #0.95 recommended
-        if config.dl<0.95:
-            config.dl=0.95
+    if (1.1<= config.dl <= 1.2) == False: #1.1 recommended
+        if config.dl<1.1:
+            config.dl=1.1
         elif config.dl >1.2:
             config.dl=1.2
     

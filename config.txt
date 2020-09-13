@@ -3,7 +3,7 @@
 // Dimensão da bolha em pixeis (raio)
 20
 // dl – distancia para avaliação da colisão (percentagem do diametro)
-0.95
+1.1
 // Numero de linhas iniciais com bolhas
 2
 // Geração de uma nova linha de bolhas ao fim de N jogadas
