@@ -91,21 +91,3 @@ def write_results(players_name, players_score):
 
 
 
-#----------------------------------------------
-# Function: initializes the config class with the specs given
-# Input: specs -> list of specs
-# Output: initial_config -> config class filled
-def text_input(event, name):
-    flag=True
-    if event.key == pygame.K_RETURN:
-        flag=False
-    elif event.key == pygame.K_BACKSPACE:
-        name = name[:-1]
-    elif event.key == pygame.K_SPACE:
-        print('')
-    else: 
-        name += event.unicode
-    if flag == True:
-        return name, True
-    else:
-        return name, False
