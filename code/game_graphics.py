@@ -3,8 +3,9 @@
 # Function: Deals with all things game-graphics related
 
 import classes
-import pygame
 import in_game as ingame
+
+import pygame
 import math
 import time
 
