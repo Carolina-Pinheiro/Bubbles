@@ -25,6 +25,55 @@ def pre_init():
 
 
 #----------------------------------------------
+# Function: checks if the config info is within the limits to make the game playable
+# Input: config -> config class that contains the grid info
+# Output: ---
+def check_config(config):
+    #Width
+    if (550<=config.width<=1300) == False:
+        if config.width<550:
+            config.width=550
+        elif config.width >1300:
+            config.width=1300
+    
+    #Height
+    if (400<= config.height <= 650)== False:
+        if config.height<400:
+            config.height=400
+        elif config.height >1300:
+            config.height=1300
+    
+    #Radius
+    if (15<= config.r<= 35 )== False: #20 recommended
+        if config.r<15:
+            config.r=15
+        elif config.r >35:
+            config.r=35
+    
+    #Coliding distance (percentage of diameter)
+    if (0.95<= config.dl <= 1.2) == False: #0.95 recommended
+        if config.dl<0.95:
+            config.dl=0.95
+        elif config.dl >1.2:
+            config.dl=1.2
+    
+    #Initial lines
+    if (0<= config.initial_lines<= 5) == False: #2 recommended
+        if config.initial_lines<0:
+            config.initial_lines=0
+        elif config.initial_lines >5:
+            config.initial_lines=5
+    
+    #Moves before adding a new line
+    if (5<= config.N_moves <= 20 ) == False: #15 recommended
+        if config.N_moves<5:
+            config.N_moves=5
+        elif config.N_moves >20:
+            config.N_moves=20
+
+
+
+#----------------------------------------------
 # Function: fetches data from selected file
 # Input: ---
 # Output: data -> list with each line of the file

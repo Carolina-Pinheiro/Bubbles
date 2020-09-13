@@ -19,7 +19,7 @@ import time
 config= pap.pre_init()
 
 #Check config
-##########################
+pap.check_config(config)
 
 #Initialize game
 config=ggraph.init_window(config)
