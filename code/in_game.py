@@ -3,9 +3,10 @@
 # Function: Deals with all things game-related
 
 import classes 
+import game_graphics as ggraph
+
 import numpy as np
 import pygame
-import game_graphics as ggraph
 import random
 import math
 import time
