@@ -195,7 +195,7 @@ def launch_bubble(config,  bubble_in_play, bubbles):
 # Function: 
 # Input: 
 # Output: 
-def game_over_screen(config,score):
+def game_over_screen(config):
     surfaces=[]
     #TextSurface
     myfont = pygame.font.SysFont('lucidaconsole', int(SIZE_BOARD))
