@@ -16,9 +16,47 @@ import time
 # Function: 
 # Input: config -> class that contains the info from the config file
 # Output:
-def game_loop(bubbles, bubble_in_play, launched, attached, game, config):
+def game_loop(background_sized, config,bubbles, bubble_in_play, game ):
+    #White Background 
+    config.screen.blit(background_sized[0], (0, ggraph.SIZE_BOARD))
+    config.screen.blit(background_sized[1], (0,0))
     
-    return game, launched, attached
+    #Draw Control Board
+    controls=ggraph.control_board(config)
+
+    #Draw Bubbles
+    ggraph.draw_bubbles(config, bubbles)
+    ggraph.draw_next_bubble(config,bubble_in_play[0])
+
+    #If a bubble is not in movement
+    if bubble_in_play[1].launched == False:
+        #Pointer
+        (x,y), alpha=line(config)
+        ggraph.draw_line(config, (x,y), alpha)
+        
+        #Draw bubble
+        ggraph.draw_one_bubble(config,bubble_in_play[1])
+        
+        #Events
+        bubbles=check_num_plays(config, bubbles)
+        game, new_game=events(controls, config, bubble_in_play, alpha, bubbles)
+        
+        #Check if it is a game over
+        if game == True:
+            game=game_over(bubbles)
+        
+        #Check new game
+        if new_game== True:
+            bubbles=init_board(config)
+            config.score=0
+        
+    else:
+        #Ball is in movement
+        ggraph.launch_bubble(config, bubble_in_play, bubbles)
+    
+    #Update Screen
+    pygame.display.update()
+    return game, bubbles
 
 
 
@@ -67,59 +105,56 @@ def events(controls, config, bubble_in_play, alpha, bubbles):
             pos = pygame.mouse.get_pos()
             #Check if any buttons were pressed
             game, new_game= ggraph.check_buttons(controls, pos)
-            if new_game== True:
-                bubbles=init_board(config)
-                config.score=0
-                return game, bubbles
             if pos[1]>ggraph.SIZE_BOARD:
                 bubble_in_play[1].launched = True
                 #Define anlge of launch
                 config.number_plays+= 1
                 bubble_in_play[1].angle= alpha
-                return game
+                return game, new_game
     
-    return game
+    return game, new_game
 
+
+
+#----------------------------------------------
+# Function: 
+# Input: 
+# Output: 
+def load_colors(config):
+    colors_list=[]
+    # 1-red
+    colors_list.append(pygame.image.load("./images/red.png"))
+    # 2 purple
+    colors_list.append(pygame.image.load("./images/purple.png"))
+    # 3 blue
+    colors_list.append(pygame.image.load("./images/blue.png"))
+    # 4 cyan
+    colors_list.append(pygame.image.load("./images/cyan.png"))
+    # 5 green
+    colors_list.append(pygame.image.load("./images/green.png"))
+    # 6 yellow
+    colors_list.append(pygame.image.load("./images/yellow.png"))
+    # 7 brown
+    colors_list.append(pygame.image.load("./images/brown.png"))
+    # 8 black
+    colors_list.append(pygame.image.load("./images/black.png"))
+    # 9 white 
+    colors_list.append(pygame.image.load("./images/white.png"))
+
+    for i, color in enumerate(colors_list):
+        colors_list[i]=pygame.transform.scale(color, (2*config.r, 2*config.r))
+    return colors_list
 
 
 #----------------------------------------------
 # Function: matches the number to a color
 # Input: bubble -> the corresponding number of the bubble
 # Output: color -> (R,G,B)
-def pick_color(bubble):
-    #Colors
-    # 1-red
-    if bubble==1: 
-        color = (255,0,0)
-    # 2 purple
-    elif bubble == 2:
-        color = (200,0,220)
-    # 3 blue
-    elif bubble == 3:
-        color = (0,0,255)
-    # 4 cyan
-    elif bubble == 4:
-        color = (0,255,255)
-    # 5 green
-    elif bubble == 5:
-        color = (0,200,0)
-    # 6 yellow
-    elif bubble == 6:
-        color = (255,223,0)
-    # 7 brown
-    elif bubble == 7:
-        color = (101,67,35)
-    # 8 black
-    elif bubble == 8:
-        color = (0,0,0)
-    # 9 white 
-    elif bubble == 9:
-        color = (255,255,255)
-    # empty
+def pick_color(bubble, config):
+    if bubble!=0:
+        return (config.colors_list[bubble-1])
     else:
-        color= (255,255,255)
-    
-    return color
+        return(config.colors_list[8])
 
 
 
@@ -288,21 +323,45 @@ def pop_bubble(bubbles, color, i,j, pop_list):
     #print(i,j)
     bubbles[i][j].checked= True
 
+    #Right
     if j+1<len(bubbles[0]) and bubbles[i][j+1].color== color and bubbles[i][j+1].checked == False:
         pop_list.append([i,j+1])
         pop_list=pop_bubble(bubbles, color, i, j+1, pop_list)
 
+    #Below
     if i+1<len(bubbles[:,0]) and bubbles[i+1][j].color == color and bubbles[i+1][j].checked == False:
         pop_list.append([i+1,j])
         pop_list=pop_bubble(bubbles, color, i+1, j, pop_list)
 
-    if bubbles[i][j-1].color == color and bubbles[i][j-1].checked == False:
+    #Left
+    if j-1>= 0 and bubbles[i][j-1].color == color and bubbles[i][j-1].checked == False:
         pop_list.append([i,j-1])
         pop_list=pop_bubble(bubbles, color, i, j-1, pop_list)
 
-    if bubbles[i-1][j].color == color and bubbles[i-1][j].checked == False:
+    #Above
+    if i-1>=0 and bubbles[i-1][j].color == color and bubbles[i-1][j].checked == False:
         pop_list.append([i-1,j])
         pop_list=pop_bubble(bubbles, color, i-1, j, pop_list)
+
+    #UpRight
+    if i-1>=0 and j+1<len(bubbles[0]) and bubbles[i-1][j+1].color == color and bubbles[i-1][j+1].checked == False:
+        pop_list.append([i-1,j+1])
+        pop_list=pop_bubble(bubbles, color, i-1, j+1, pop_list)
+
+    #UpLeft
+    if i-1>=0 and j-1>= 0 and bubbles[i-1][j-1].color == color and bubbles[i-1][j-1].checked == False:
+        pop_list.append([i-1,j-1])
+        pop_list=pop_bubble(bubbles, color, i-1, j-1, pop_list)
+
+    #DownRight
+    if i+1<len(bubbles[:,0]) and j+1<len(bubbles[0]) and bubbles[i+1][j+1].color == color and bubbles[i+1][j+1].checked == False:
+        pop_list.append([i+1,j+1])
+        pop_list=pop_bubble(bubbles, color, i+1, j+1, pop_list)
+
+    #DownLeft
+    if i+1<len(bubbles[:,0]) and j-1>=0 and bubbles[i+1][j-1].color == color and bubbles[i+1][j-1].checked == False:
+        pop_list.append([i+1,j-1])
+        pop_list=pop_bubble(bubbles, color, i+1, j-1, pop_list)
 
     return pop_list
 
@@ -313,7 +372,6 @@ def pop_bubble(bubbles, color, i,j, pop_list):
 # Input:
 # Output:
 def clean_board(bubbles, pop_list, config):
-    print(pop_list)
     for [i,j] in pop_list:
         if len(pop_list)>=3:
             bubbles[i][j].color=0
@@ -340,7 +398,6 @@ def game_over(bubbles):
 # Output:
 def check_num_plays(config, bubbles):
     if config.number_plays == config.N_moves:
-        print('new line')
 
         #Generate a new line
         lines=(int(config.width/(2*config.r)))
@@ -353,12 +410,7 @@ def check_num_plays(config, bubbles):
             for j in range(len (bubbles[0])):
                 bubbles[i][j].color=bubbles[i-1][j].color
 
-        #for bubble in bubbles[0]:
-        #    print(bubble.color)
         #Add new line to the matrix
         bubbles[0]=new_line.T
-        for i, bubble in enumerate(bubbles[0]):
-            print(bubble.color)
-
         config.number_plays=0
     return bubbles

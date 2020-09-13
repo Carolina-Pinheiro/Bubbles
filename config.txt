@@ -1,5 +1,5 @@
 // Dimensoes da janela em termo de bolhas (largura e altura)
-600 600
+800 600
 // Dimensão da bolha em pixeis (raio)
 20
 // dl – distancia para avaliação da colisão (percentagem do diametro)

@@ -75,11 +75,12 @@ def control_board( config):
 def check_buttons(controls, pos):
     for button in controls:
         if button.collidepoint(pos):
+            #New Gane
             if button== controls[0]:
                 print('new game')
                 return True, True
+            #End Game
             elif button == controls[1]:
-                print('end game')
                 return False, False
     
     return True, False
@@ -144,11 +145,12 @@ def draw_line(config, end_pos, alpha):
 # Input: 
 # Output: ---
 def draw_one_bubble( config, bubble):
-    color= ingame.pick_color(bubble.color)
+    color= ingame.pick_color(bubble.color, config)
+    config.screen.blit(color, (bubble.x-config.r,bubble.y-config.r))
     #Draw Circle
-    pygame.draw.circle(config.screen, color, (bubble.x,bubble.y), config.r)
+    #pygame.draw.circle(config.screen, color, (bubble.x,bubble.y), config.r)
     #Draws outline
-    pygame.draw.circle(config.screen, (0,0,0),(bubble.x,bubble.y), config.r, 1)
+    #pygame.draw.circle(config.screen, (0,0,0),(bubble.x,bubble.y), config.r, 1)
 
 
 
@@ -197,16 +199,20 @@ def game_over_screen(config,score):
     surfaces=[]
     #TextSurface
     myfont = pygame.font.SysFont('lucidaconsole', int(SIZE_BOARD))
-    surfaces.append( myfont.render('Game Over', False, (0,0,0)) )
-
-    myfont = pygame.font.SysFont('lucidaconsole', int(0.75*SIZE_BOARD))
     surfaces.append( myfont.render('Score: '+ str(config.score), False, (0,0,0)) )
-    surfaces.append( myfont.render('Insert Name', False, (0,0,0)) )
+    surfaces.append( myfont.render('Insert Name:', False, (0,0,0)) )
     
+    #Game Over graph (original: 250x100)
+    factor=1.2
+    game_over_graph = pygame.image.load('./images/game_over.png')
+    game_over_graph=pygame.transform.rotozoom(game_over_graph,0,factor )
+    config.screen.blit(game_over_graph, ((config.width - 250*factor)/2, 2*SIZE_BOARD))
+
     #Draw Text
-    config.screen.blit(surfaces[0],(int(0.10*config.width), int(0.2*config.height) ))
-    config.screen.blit(surfaces[1],(int(0.10*config.width), int(0.3*config.height) ))
-    config.screen.blit(surfaces[2],(int(0.10*config.width), int(0.4*config.height) ))
+    config.screen.blit(surfaces[0],(int(0.10*config.width), int(0.5*config.height) ))
+    config.screen.blit(surfaces[1],(int(0.10*config.width), int(0.6*config.height) ))
+
+
 
 
 

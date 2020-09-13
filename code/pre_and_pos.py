@@ -67,7 +67,6 @@ def initialize_specs(specs):
 # Input: specs -> list of specs
 # Output: initial_config -> config class filled
 def write_results(players_name, players_score):
-    print(players_name)
     #Open File and write
     results=open(r'C:\Users\cppin\Desktop\GitHub\Bubbles\results.txt', 'a')
     results.write(str(players_name) + ' '+ str(players_score) +'\n')
@@ -103,8 +102,8 @@ def text_input(event, name):
     elif event.key == pygame.K_BACKSPACE:
         name = name[:-1]
     elif event.key == pygame.K_SPACE:
-        print('Espaço não, cara')
-    else:
+        print('')
+    else: 
         name += event.unicode
     if flag == True:
         return name, True

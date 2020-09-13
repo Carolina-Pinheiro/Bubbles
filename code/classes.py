@@ -10,6 +10,7 @@ class config:
         self.screen= screen
         self.score=0
         self.number_plays=0
+        self.colors_list=0
 
 #Bubble Class
 class bubble:
