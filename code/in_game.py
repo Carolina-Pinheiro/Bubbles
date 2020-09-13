@@ -11,7 +11,56 @@ import random
 import math
 import time
 
-#launched= False
+#----------------------------------------------
+# Function: initializes a game board, randomly generating bubbles
+# Input: config -> class that contains the info from the config file
+# Output: bubbles -> matrix with the bubbles generated
+def init_board(config):
+    #Generate game board
+    n_bubbles = int (config.width / (2*config.r))
+    #Calculate the max number of lines
+    max_lines= int(config.height/(2*config.r) ) -config.initial_lines -1
+    #Create Matrix
+    bubbles= np.empty((max_lines+config.initial_lines, n_bubbles ), dtype=classes.bubble)
+    
+    #Fill matrix 
+    for i in range(max_lines+ config.initial_lines):
+        for j in range(n_bubbles):
+            if i < config.initial_lines:
+                #classes.bubble(x,y,color)
+                bubbles[i][j]=classes.bubble(j*2*config.r + config.r,i*2*config.r + config.r + ggraph.SIZE_BOARD, random.randrange(1,10))
+            else:
+                #empty
+                bubbles[i][j]=classes.bubble(j*2*config.r + config.r,i*2*config.r + config.r + ggraph.SIZE_BOARD, 0)
+    return bubbles
+
+
+
+#----------------------------------------------
+# Function: Initializes the variables needed in main
+# Input: config -> class that contains the info from the config file + more
+# Output: bubbles-> matrix with the bubbles generated, bubble_in_play-> bubbles that will be launched, background_sized-> background images sized to the appropriate size
+def initialize_variables(config):
+    #Bubbles matrix
+    bubbles=init_board(config)
+
+    #Load colors images to config
+    config.colors_list=load_colors(config)
+
+    #Bubbles that will be launched
+    bubble_in_play=[classes.bubble(config.r, config.height+ggraph.SIZE_BOARD-config.r, random.randrange(1,10) ),
+                    classes.bubble_moving(int(config.width/2), config.height+ggraph.SIZE_BOARD-config.r, random.randrange(1,10), 0, False)]
+
+    #Backgrounds
+    background = pygame.image.load('./images/fundo.jpg')
+    background2 = pygame.image.load('./images/fundo2.jpg')
+
+    background_sized= [pygame.transform.scale(background, (config.width, config.height))]
+    background_sized.append(pygame.transform.scale(background2, (config.width, ggraph.SIZE_BOARD)))
+    
+    return bubbles, bubble_in_play, background_sized
+
+
 
 #----------------------------------------------
 # Function: 
@@ -58,44 +107,6 @@ def game_loop(background_sized, config,bubbles, bubble_in_play, game ):
     #Update Screen
     pygame.display.update()
     return game, bubbles
-
-def initialize_variables(config):
-    bubbles=init_board(config)
-    config.colors_list=load_colors(config)
-
-    bubble_in_play=[classes.bubble(config.r, config.height+ggraph.SIZE_BOARD-config.r, random.randrange(1,10) ),
-                    classes.bubble_moving(int(config.width/2), config.height+ggraph.SIZE_BOARD-config.r, random.randrange(1,10), 0, False)]
-
-    background = pygame.image.load('./images/fundo.jpg')
-    background2 = pygame.image.load('./images/fundo2.jpg')
-
-    background_sized= [pygame.transform.scale(background, (config.width, config.height))]
-    background_sized.append(pygame.transform.scale(background2, (config.width, ggraph.SIZE_BOARD)))
-    return bubbles, bubble_in_play, background_sized
-
-#----------------------------------------------
-# Function: initializes a game board, randomly generating bubbles
-# Input: config -> class that contains the info from the config file
-# Output: bubbles -> matrix with the bubbles generated
-def init_board(config):
-    #Generate game board
-    n_bubbles = int (config.width / (2*config.r))
-    #Calculate the max number of lines
-    max_lines= int(config.height/(2*config.r) ) -config.initial_lines -1
-    #Create Matrix
-    bubbles= np.empty((max_lines+config.initial_lines, n_bubbles ), dtype=classes.bubble)
-    
-    #Fill matrix 
-    for i in range(max_lines+ config.initial_lines):
-        for j in range(n_bubbles):
-            if i < config.initial_lines:
-                #classes.bubble(x,y,color)
-                bubbles[i][j]=classes.bubble(j*2*config.r + config.r,i*2*config.r + config.r + ggraph.SIZE_BOARD, random.randrange(1,10))
-            else:
-                #empty
-                bubbles[i][j]=classes.bubble(j*2*config.r + config.r,i*2*config.r + config.r + ggraph.SIZE_BOARD, 0)
-    return bubbles
-
 
 
 
@@ -225,11 +236,10 @@ def line(config):
 
 
 
-
 #----------------------------------------------
-# Function: 
-# Input:
-# Output: 
+# Function: Calculates the distance between two points
+# Input: p1, p2-> tuples in the format (x,y) that correspond to the points
+# Output: distance between the two points
 def calculate_distance(p1,p2):
     dist=math.sqrt((p1[0]-p2[0])**2 + (p1[1]-p2[1])**2  )
     return dist
