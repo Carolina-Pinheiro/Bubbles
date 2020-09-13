@@ -14,7 +14,7 @@ import time
 
 #----------------------------------------------
 # Function: 
-# Input: config -> class that contains the info from the config file
+# Input: 
 # Output:
 def game_loop(background_sized, config,bubbles, bubble_in_play, game ):
     #White Background 
@@ -58,7 +58,19 @@ def game_loop(background_sized, config,bubbles, bubble_in_play, game ):
     pygame.display.update()
     return game, bubbles
 
+def initialize_variables(config):
+    bubbles=init_board(config)
+    config.colors_list=load_colors(config)
 
+    bubble_in_play=[classes.bubble(config.r, config.height+ggraph.SIZE_BOARD-config.r, random.randrange(1,10) ),
+                    classes.bubble_moving(int(config.width/2), config.height+ggraph.SIZE_BOARD-config.r, random.randrange(1,10), 0, False)]
+
+    background = pygame.image.load('./images/fundo.jpg')
+    background2 = pygame.image.load('./images/fundo2.jpg')
+
+    background_sized= [pygame.transform.scale(background, (config.width, config.height))]
+    background_sized.append(pygame.transform.scale(background2, (config.width, ggraph.SIZE_BOARD)))
+    return bubbles, bubble_in_play, background_sized
 
 #----------------------------------------------
 # Function: initializes a game board, randomly generating bubbles
@@ -414,3 +426,56 @@ def check_num_plays(config, bubbles):
         bubbles[0]=new_line.T
         config.number_plays=0
     return bubbles
+
+
+#----------------------------------------------
+# Function: 
+# Input: 
+# Output: 
+def text_input(event, name):
+    flag=True
+    if event.key == pygame.K_RETURN:
+        flag=False
+    elif event.key == pygame.K_BACKSPACE:
+        name = name[:-1]
+    elif event.key == pygame.K_SPACE:
+        print('')
+    else: 
+        name += event.unicode
+    if flag == True:
+        return name, True
+    else:
+        return name, False
+
+
+
+
+#----------------------------------------------
+# Function: 
+# Input:
+# Output:
+def game_over_loop(config, background_sized, game_over, name):
+    #Background
+    config.screen.blit(background_sized, (0, 0))
+    ggraph.game_over_screen(config)
+    
+    for event in pygame.event.get():
+        #Close Window
+        if event.type == pygame.QUIT:
+            game_over= False
+        #Get input text
+        if event.type == pygame.KEYDOWN:
+            name, game_over=text_input(event,name)
+    
+    #Text Box
+    write_rect=pygame.Rect (int(0.09*config.width), int(0.69*config.height), int(0.85*config.width), int(1.1*ggraph.SIZE_BOARD) )
+    pygame.draw.rect(config.screen, (255,255,255), write_rect)
+    pygame.draw.rect(config.screen, (0,0,0), write_rect, 2)
+
+    #Write Input
+    myfont = pygame.font.SysFont('lucidaconsole', int(ggraph.SIZE_BOARD))
+    surface= myfont.render(str(name), False, (0,0,0))
+    config.screen.blit(surface,(int(0.10*config.width), int(0.7*config.height)) )
+    pygame.display.update()
+
+    return game_over, name
