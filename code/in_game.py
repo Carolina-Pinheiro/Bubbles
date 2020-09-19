@@ -54,10 +54,14 @@ def initialize_variables(config):
     #Backgrounds
     background = pygame.image.load('./images/fundo.jpg')
     background2 = pygame.image.load('./images/fundo2.jpg')
+    logo=pygame.image.load('./images/logo.png')
 
     background_sized= [pygame.transform.scale(background, (config.width, config.height))]
     background_sized.append(pygame.transform.scale(background2, (config.width, ggraph.SIZE_BOARD)))
-    
+    factor=1
+    background_sized.append(pygame.transform.rotozoom(logo,0,factor ))
+    background_sized.append( pygame.transform.scale(pygame.image.load('./images/fundo.jpg'), (config.width, config.height+ ggraph.SIZE_BOARD)) )
+
     return bubbles, bubble_in_play, background_sized
 
 
@@ -66,7 +70,47 @@ def initialize_variables(config):
 # Function: 
 # Input: 
 # Output:
-def game_loop(background_sized, config,bubbles, bubble_in_play, game ):
+def menu(background_sized, config, rect):
+    menu=0
+    config.screen.blit(background_sized[0], (0, ggraph.SIZE_BOARD))
+    config.screen.blit(background_sized[1], (0,0))
+    
+    for rectangles in rect:
+        pygame.draw.rect(config.screen, (0,0,0), rectangles, 4)
+    
+    surfaces=[]
+    myfont = pygame.font.SysFont('lucidaconsole', int(config.height/10))
+    surfaces.append( myfont.render('Play', False, (0,0,0)) )
+    surfaces.append(myfont.render('Results', False, (0,0,0)))
+    
+    config.screen.blit(surfaces[0],(int(0.33*config.width), int(0.45*config.height)) )
+    config.screen.blit(surfaces[1],(int(0.33*config.width), int(0.75*config.height)) )
+    config.screen.blit(background_sized[2],(0.25*config.width,0))
+
+    pygame.display.update()
+
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            menu=4
+        if pygame.mouse.get_pressed()==(True,False,False):
+            pos = pygame.mouse.get_pos()
+            for rectangles in rect:
+                if rectangles.collidepoint(pos):
+                    if rectangles==rect[0]:
+                        print('Play')
+                        menu=1
+                    elif rectangles==rect[1]:
+                        print('Results')
+                        menu=2
+    return menu
+
+
+
+#----------------------------------------------
+# Function: 
+# Input: 
+# Output:
+def game_loop(background_sized, config,bubbles, bubble_in_play, menu ):
     #White Background 
     config.screen.blit(background_sized[0], (0, ggraph.SIZE_BOARD))
     config.screen.blit(background_sized[1], (0,0))
@@ -89,11 +133,11 @@ def game_loop(background_sized, config,bubbles, bubble_in_play, game ):
         
         #Events
         bubbles=check_num_plays(config, bubbles)
-        game, new_game=events(controls, config, bubble_in_play, alpha, bubbles)
+        menu, new_game=events(controls, config, bubble_in_play, alpha, bubbles)
         
         #Check if it is a game over
-        if game == True:
-            game=game_over(bubbles)
+        if menu == 1:
+            menu=game_over(bubbles)
         
         #Check new game
         if new_game== True:
@@ -106,7 +150,7 @@ def game_loop(background_sized, config,bubbles, bubble_in_play, game ):
     
     #Update Screen
     pygame.display.update()
-    return game, bubbles
+    return menu, bubbles
 
 
 
@@ -115,28 +159,26 @@ def game_loop(background_sized, config,bubbles, bubble_in_play, game ):
 # Input: controls -> list that contains the button's position in a rect object
 # Output: game-> True while game is running, new_game-> True when a new game is created
 def events(controls, config, bubble_in_play, alpha, bubbles):
-    game=True
     new_game= False
-    launched = False
-
+    menu=1
     #Wait for an event
     for event in pygame.event.get():
         #Close Window
         if event.type == pygame.QUIT:
-            game= False
+            menu=4
         #Right Click
         if pygame.mouse.get_pressed()==(True,False,False):
             pos = pygame.mouse.get_pos()
             #Check if any buttons were pressed
-            game, new_game= ggraph.check_buttons(controls, pos)
+            menu, new_game= ggraph.check_buttons(controls, pos)
             if pos[1]>ggraph.SIZE_BOARD:
                 bubble_in_play[1].launched = True
                 #Define anlge of launch
                 config.number_plays+= 1
                 bubble_in_play[1].angle= alpha
-                return game, new_game
+                return menu, new_game
     
-    return game, new_game
+    return menu, new_game
 
 
 
@@ -168,6 +210,7 @@ def load_colors(config):
     for i, color in enumerate(colors_list):
         colors_list[i]=pygame.transform.scale(color, (2*config.r, 2*config.r))
     return colors_list
+
 
 
 #----------------------------------------------
@@ -401,6 +444,8 @@ def clean_board(bubbles, pop_list, config):
             config.score = config.score + 1
         bubbles[i][j].checked = False
 
+
+
 #----------------------------------------------
 # Function: 
 # Input:
@@ -410,8 +455,8 @@ def game_over(bubbles):
     for i in range(cols):
         if bubbles[rows-1][i].color!=0:
             print('Game Over')
-            return False
-    return True
+            return 5
+    return 1
 
 
 
@@ -439,25 +484,25 @@ def check_num_plays(config, bubbles):
     return bubbles
 
 
+
 #----------------------------------------------
 # Function: 
 # Input: 
 # Output: 
 def text_input(event, name):
-    flag=True
+    flag=1
     if event.key == pygame.K_RETURN:
-        flag=False
+        flag=2
     elif event.key == pygame.K_BACKSPACE:
         name = name[:-1]
     elif event.key == pygame.K_SPACE:
         print('')
     else: 
         name += event.unicode
-    if flag == True:
-        return name, True
+    if flag == 1:
+        return name, 3
     else:
-        return name, False
-
+        return name, 5
 
 
 
@@ -465,18 +510,19 @@ def text_input(event, name):
 # Function: 
 # Input:
 # Output:
-def game_over_loop(config, background_sized, game_over, name):
+def game_over_loop(config, background_sized, menu, name):
+    flag=1
     #Background
-    config.screen.blit(background_sized, (0, 0))
+    config.screen.blit(background_sized[3], (0, 0))
     ggraph.game_over_screen(config)
     
     for event in pygame.event.get():
         #Close Window
         if event.type == pygame.QUIT:
-            game_over= False
+            menu =4
         #Get input text
         if event.type == pygame.KEYDOWN:
-            name, game_over=text_input(event,name)
+            name, menu=text_input(event,name)
     
     #Text Box
     write_rect=pygame.Rect (int(0.09*config.width), int(0.69*config.height), int(0.85*config.width), int(1.1*ggraph.SIZE_BOARD) )
@@ -489,4 +535,56 @@ def game_over_loop(config, background_sized, game_over, name):
     config.screen.blit(surface,(int(0.10*config.width), int(0.7*config.height)) )
     pygame.display.update()
 
-    return game_over, name
+    return menu, name
+
+
+
+#----------------------------------------------
+# Function: 
+# Input:
+# Output:
+def results(background_sized, config):
+    menu=2
+    #Read First 5 lines of the results doc
+        #Open File
+    results=open(r'C:\Users\cppin\Desktop\GitHub\Bubbles\results.txt')
+    lines=results.readlines()
+    results.close()
+    
+    #Background
+    config.screen.blit(background_sized[3], (0, 0))
+    
+    #Write "Results" at the top
+    myfont = pygame.font.SysFont('lucidaconsolebold', int(ggraph.SIZE_BOARD+10))
+    surface= myfont.render('Results', False, (0,0,0))
+    config.screen.blit(surface,(int(0.10*config.width), int(0.1*config.height)) )
+    
+    #Write player's score
+    myfont = pygame.font.SysFont('lucidaconsole', int(ggraph.SIZE_BOARD-5))
+    for i, line in enumerate(lines):
+        if i<=4:
+            line=line.replace('\n','')
+            #Write Input
+            surface= myfont.render(str(line), False, (0,0,0))
+            config.screen.blit(surface,(int(0.10*config.width), int(0.3*config.height+0.15*i*config.height)) )
+
+    #Draw Go Back Button
+    rect= pygame.Rect (0.025*config.width, 0.1*ggraph.SIZE_BOARD, 0.15*config.width, 0.8*ggraph.SIZE_BOARD ) 
+    surface=  myfont.render('Back', False, (0,0,0))
+
+    pygame.draw.rect(config.screen, (0,0,0), rect, 2)
+    config.screen.blit(surface,(0.04*config.width, 0.1*ggraph.SIZE_BOARD) )
+
+    for event in pygame.event.get():
+        #Close Window
+        if event.type == pygame.QUIT:
+            menu =4
+            print('Close')
+        #Back Button
+        if pygame.mouse.get_pressed()==(True,False,False):
+            pos = pygame.mouse.get_pos()
+            if rect.collidepoint(pos) == True:
+                return 0
+    
+    pygame.display.update()
+    return menu

@@ -79,12 +79,12 @@ def check_buttons(controls, pos):
             #New Gane
             if button== controls[0]:
                 print('new game')
-                return True, True
+                return 1, True
             #End Game
             elif button == controls[1]:
-                return False, False
+                return 3, False
     
-    return True, False
+    return 1, False
 
 
 
@@ -97,8 +97,6 @@ def draw_bubbles(config, bubbles):
         for j in range (int (config.width / (2*config.r))):  
             if bubbles[i][j].color!= 0:   
                 draw_one_bubble(config,bubbles[i][j])
-
-
 
 
 
@@ -137,7 +135,6 @@ def draw_line(config, end_pos, alpha):
     
     #Draw Triangle
     pygame.draw.polygon(config.screen, (0,0,0), [end_pos, (x1,y1), (x2,y2)])
-    
 
 
 
@@ -191,7 +188,6 @@ def launch_bubble(config,  bubble_in_play, bubbles):
 
 
 
-
 #----------------------------------------------
 # Function: 
 # Input: 
@@ -212,9 +208,6 @@ def game_over_screen(config):
     #Draw Text
     config.screen.blit(surfaces[0],(int(0.10*config.width), int(0.5*config.height) ))
     config.screen.blit(surfaces[1],(int(0.10*config.width), int(0.6*config.height) ))
-
-
-
 
 
 

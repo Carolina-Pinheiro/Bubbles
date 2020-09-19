@@ -14,7 +14,6 @@ def pre_init():
     #Read config.txt
     data=config_data()
     specs=[]
-
     #Separate Text
     for i in range(len(data)):
         if '//' in data[i]:
@@ -126,17 +125,33 @@ def write_results(players_name, players_score):
     lines=results.readlines()
     results.close()
     results_list=[]
+    flag=False
     for line in lines:
         info=line.split()
-        name=info[0]
-        score=int(info[1])
-        results_list.append((name, score))
+        try:
+            name=info[0]
+        except IndexError:
+            print('IndexError')
+            flag=True
+        
+        try:
+            score=int(info[1])
+        except IndexError:
+            print('IndexError')
+            flag=True
+        except ValueError:
+            print('Value Error')
+            flag=True
+        
+        if flag==False:
+            results_list.append((name, score))
     results_list.sort(key=itemgetter(1), reverse=True)
     
     #Open File and write in order
     results=open(r'C:\Users\cppin\Desktop\GitHub\Bubbles\results.txt', 'w')
     for (name, score) in results_list:
         results.write(name +' ' + str(score) + '\n')
+    results.close()
 
 
 
