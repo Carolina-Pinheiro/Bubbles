@@ -1,3 +1,8 @@
 # Bubbles
+# Bubble shooter game
+![Alt Text](https://media.giphy.com/media/oEYS4XMbEXwxtCmABC/giphy.gif)
 
-Bubble Shooter game
+
+Change config in config.txt
+
+Results are saved in results.txt
