@@ -455,7 +455,7 @@ def game_over(bubbles):
     for i in range(cols):
         if bubbles[rows-1][i].color!=0:
             print('Game Over')
-            return 5
+            return 3
     return 1
 
 
@@ -491,7 +491,7 @@ def check_num_plays(config, bubbles):
 # Output: 
 def text_input(event, name):
     flag=1
-    if event.key == pygame.K_RETURN:
+    if event.key == pygame.K_RETURN or event.key == pygame.K_KP_ENTER:
         flag=2
     elif event.key == pygame.K_BACKSPACE:
         name = name[:-1]

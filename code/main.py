@@ -39,7 +39,7 @@ while game:
 
     #Game Loop
     elif menu ==1:
-            menu, bubbles = ingame.game_loop(background_sized, config,bubbles,bubble_in_play, menu)
+        menu, bubbles = ingame.game_loop(background_sized, config,bubbles,bubble_in_play, menu)
         #Short Pause so the player can see the board before the game over screen
         #time.sleep(0.75) 
     
@@ -58,4 +58,5 @@ while game:
         pap.write_results(name, config.score)
         bubbles, bubble_in_play, background_sized= ingame.initialize_variables(config)
         config.score=0
+        config.number_plays=0
         menu=0
